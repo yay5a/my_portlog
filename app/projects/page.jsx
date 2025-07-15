@@ -1,7 +1,7 @@
 import React from "react";
 import Image from "next/image";
 
-export default function Home() {
+export default function Projects() {
     return (
         <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
             <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
@@ -14,19 +14,13 @@ export default function Home() {
                                 alt="Logo"
                                 width={100}
                                 height={100}
-                                />
-                            <h2 className="text-4xl md:text-4xl font-bold text white">I am</h2>
-      <h1 className="text-4xl md:text-6xl font-bold text white">
-                                Yaysa
-                            </h1>
+                            />
+                            <h1 className="text-4xl md:text-6xl font-bold text white">Projects</h1>
                         </div>
-                        <li className="mb-2 tracking-[-.01em]">
-                            Optimistic, open-minded, curious, and adventurous.
-                        </li>
-                        <li className="tracking-[-.01em]">
-                            Dependable, grounded, and intense — even when cheerful
-                        </li>
                     </section>
+                    <p className="text-foreground/70 text-lg sm:text-xl max-w-2xl mb-8 tracking-[-.01em]">
+                        Here are some of the projects I've worked on. Feel free to explore and reach out if you have any questions or feedback!
+                    </p>
                 </div>
             </main>
         </div>
