@@ -14,17 +14,17 @@ export default function Home() {
                                 alt="Logo"
                                 width={100}
                                 height={100}
-                                />
-                            <h2 className="text-4xl md:text-4xl font-bold text white">I am</h2>
-      <h1 className="text-4xl md:text-6xl font-bold text white">
+                            />
+                            <h2 className="text-4xl md:text-4xl font-bold text white">
+                                I am
+                            </h2>
+                            <h1 className="text-4xl md:text-6xl font-bold text white">
                                 Yaysa
                             </h1>
                         </div>
                         <li className="mb-2 tracking-[-.01em]">
-                            Optimistic, open-minded, curious, and adventurous.
                         </li>
                         <li className="tracking-[-.01em]">
-                            Dependable, grounded, and intense — even when cheerful
                         </li>
                     </section>
                 </div>
