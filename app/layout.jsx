@@ -25,6 +25,13 @@ export default function RootLayout({ children }) {
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <Nav />
         {children}
+    <footer>
+      <div className="container mx-auto py-4 text-center">
+        <p className="text-sm text-foreground/70">
+          © {new Date().getFullYear()} Yaysa's Holo-folio. All rights reserved.
+        </p>
+      </div>
+    </footer>
       </body>
     </html>
   );
