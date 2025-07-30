@@ -45,7 +45,7 @@ export default function Home() {
             <aside className="space-y-6">
                 <section className="card p-6 text-center">
                     <Image
-                        src="/466858.jpg"
+                        src="/self.jpg"
                         alt="Portrait"
                         width={120}
                         height={120}
