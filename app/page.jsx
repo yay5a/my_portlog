@@ -22,10 +22,10 @@ export default function Home() {
                                 Yaysa
                             </h1>
                         </div>
-                        <li className="mb-2 tracking-[-.01em]">
+                        {/* <li className="mb-2 tracking-[-.01em]">
                         </li>
                         <li className="tracking-[-.01em]">
-                        </li>
+                        </li> */}
                     </section>
                 </div>
             </main>
