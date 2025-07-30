@@ -1,3 +1,5 @@
+import fs from "fs";
+import path from "path";
 import { notFound } from "next/navigation";
 
 // return a list of static paths at build time
