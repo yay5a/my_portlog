@@ -79,7 +79,6 @@ export default function Home() {
                 </section>
             </aside>
             <main className="space-y-6 mt-8 md:mt-0">
-                <h1 className="text-3xl font-bold">BLOG</h1>
                 <div className="space-y-4">
                     {posts.map((post) => (
                         <article key={post.slug} className="card p-6 space-y-2">
