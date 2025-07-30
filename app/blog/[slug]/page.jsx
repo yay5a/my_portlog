@@ -16,11 +16,12 @@ export const dynamicParams = true;
 
 export default async function Page({ params }) {
     const { slug } = await params;
+    console.log("📦 slug:", await params);
     try {
         // import MDX file
         const { default: Post } = await import(`@/content/posts/${slug}.mdx`);
         return (
-            <article className="prose">
+            <article className="prose mx-auto py-8">
                 <Post />
             </article>
         );

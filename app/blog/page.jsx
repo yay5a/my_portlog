@@ -16,16 +16,12 @@ export default async function BlogPage() {
         }));
 
     return (
-        <div className="max-w-prose mx-auto p-4 flex">
-            <h1 className="text-2xl font-bold mb-4">Blog Posts</h1>
-            <ul className="list-disc pl-5 space-y-2">
+        <div className="max-w-2xl mx-auto py-8">
+            <h1 className="text-3xl font-bold mb-4">Holo-logs</h1>
+            <ul className="space-y-4">
                 {posts.map((post) => (
                     <li key={post.slug}>
-                        <Link
-                            href={`/blog/${post.slug}`}
-                            className="text-blue-600 underline">
-                            {posts.title}
-                        </Link>
+                        <Link href={`/blog/${post.slug}`}>{post.title}</Link>
                     </li>
                 ))}
             </ul>
