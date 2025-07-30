@@ -1,18 +1,8 @@
-import createMDX from "@next/mdx";
-
 /** @type {import('next').NextConfig} */
-const nextConfig = {
-    // Only .mdx (and .md if desired) become MDX pages
-    pageExtensions: ["js", "jsx", "ts", "tsx", "mdx"],
-};
-
-const withMDX = createMDX({
-    extension: /\.mdx?$/, // <-- match .mdx files
-    options: {
-        providerImportSource: "@mdx-js/react", // <-- use MDX v1-compatible output
-        remarkPlugins: [], // add remark plugins if needed
-        rehypePlugins: [], // add rehype plugins if needed
-    },
+import createMDX from "@next/mdx";
+const withMDX = createMDX();
+const nextConfig = withMDX({
+    pageExtensions: ["js", "jsx", "ts", "tsx", "md", "mdx"],
 });
 
-export default withMDX(nextConfig);
+export default nextConfig;
