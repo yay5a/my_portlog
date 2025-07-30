@@ -12,7 +12,7 @@ export async function generateStaticParams() {
 }
 
 // (optional) on-demand dynamic routes
-export const dynamicParams = true;
+export const dynamicParams = false;
 
 export default async function Page({ params }) {
     const { slug } = await params;

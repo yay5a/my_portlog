@@ -22,8 +22,9 @@ export default function Contact() {
                         </div>
                     </section>
                     <p className="text-foreground/70 text-lg sm:text-xl max-w-2xl mb-8 tracking-[-.01em]">
-                        to collaborate, or just to say hello! I'm always open to
-                        connecting with fellow developers and enthusiasts.
+                        to collaborate, or just to say hello! I&apos;m always
+                        open to connecting with fellow developers and
+                        enthusiasts.
                     </p>
                     <section>
                         <form>
@@ -65,9 +66,13 @@ export default function Contact() {
                     <br />
                     <div>
                         <p className="text-foreground/70 text-sm sm:text-base">
-                            If you haven't already, check out my{" "}
-                            <Link className="text-blue-500 hover:underline" href="/app/blog">blog</Link> for some shower
-                            thoughts and other musings.
+                            If you haven&apos;t already, check out my{" "}
+                            <Link
+                                className="text-blue-500 hover:underline"
+                                href="/app/blog">
+                                blog
+                            </Link>{" "}
+                            for some shower thoughts and other musings.
                         </p>
                     </div>
                 </div>

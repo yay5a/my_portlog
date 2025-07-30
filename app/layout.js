@@ -17,8 +17,8 @@ export default function RootLayout({ children }) {
                 <footer>
                     <div className="container mx-auto py-4 text-center">
                         <p className="text-sm text-foreground/70">
-                            © {new Date().getFullYear()} Yaysa's Holo-folio. All
-                            rights reserved.
+                            © {new Date().getFullYear()} Yaysa&apos;s
+                            Holo-folio. All rights reserved.
                         </p>
                     </div>
                 </footer>

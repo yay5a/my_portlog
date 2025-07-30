@@ -53,14 +53,15 @@ export default function Home() {
                     />
                     <h2 className="text-2xl font-bold mb-2">About</h2>
                     <p className="muted text-sm">
-                        I'm Yaysa—a professional selfware-developer driven by a
-                        relentless curiosity and commitment to autonomy. My path
-                        has been anything but linear: from grappling with
-                        personal setbacks to embracing critical thinking as my
-                        compass, I've transformed adversity into an engine for
-                        growth. I stand at the intersection of technology and
-                        philosophical introspection. Learning to not just to
-                        build reliable systems, but meaningful ones.
+                        My name is Yaysa—a professional selfware-developer
+                        driven by a relentless curiosity and commitment to
+                        autonomy. My path has been anything but linear: from
+                        grappling with personal setbacks to embracing critical
+                        thinking as my compass, I have transformed adversity
+                        into an engine for growth. I stand at the intersection
+                        of technology and philosophical introspection. Learning
+                        to not just to build reliable systems, but meaningful
+                        ones.
                     </p>
                 </section>
                 <section className="card p-6">
