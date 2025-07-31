@@ -16,16 +16,33 @@ export const dynamicParams = false;
 
 export default async function Page({ params }) {
     const { slug } = await params;
-    console.log("📦 slug:", await params);
     try {
-        // import MDX file
-        const { default: Post } = await import(`@/content/posts/${slug}.mdx`);
+        // import MDX file and its frontmatter
+        const { default: Post, metadata } = await import(
+            `@/content/posts/${slug}.mdx`
+        );
         return (
-            <article className="py-8 mx-auto prose">
-                <Post />
+            <article className="py-8 mx-auto">
+                <header className="mb-8">
+                    <h1 className="text-4xl font-bold mb-2">
+                        {metadata.title}
+                    </h1>
+                    <time className="text-gray-500">
+                        {new Date(metadata.date).toLocaleDateString()}
+                    </time>
+                    {metadata.description && (
+                        <p className="text-gray-600 mt-2">
+                            {metadata.description}
+                        </p>
+                    )}
+                </header>
+                <div className="prose prose-lg dark:prose-invert">
+                    <Post />
+                </div>
             </article>
         );
     } catch (error) {
+        console.error(error);
         notFound();
     }
 }
