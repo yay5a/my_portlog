@@ -3,9 +3,9 @@ import Nav from "@/components/Nav";
 import "./globals.css";
 
 export const metadata = {
-    title: "Yaysa's Holocron",
+    title: "Yaysa's Portfolio-log",
     description:
-        "Yaysa's Holocron - A showcase of my work and skills as a developer.",
+        "Yaysa's Portfolio-log - A showcase of my work and skills as a developer.",
 };
 
 export default function RootLayout({ children }) {
@@ -15,10 +15,10 @@ export default function RootLayout({ children }) {
                 <Nav />
                 {children}
                 <footer>
-                    <div className="container mx-auto py-4 text-center">
+                    <div className="container py-4 mx-auto text-center">
                         <p className="text-sm text-foreground/70">
                             © {new Date().getFullYear()} Yaysa&apos;s
-                            Holo-folio. All rights reserved.
+                            Portfolio-log. All rights reserved.
                         </p>
                     </div>
                 </footer>

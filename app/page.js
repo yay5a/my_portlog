@@ -49,10 +49,10 @@ export default function Home() {
                         alt="Portrait"
                         width={120}
                         height={120}
-                        className="rounded-full mx-auto mb-4"
+                        className="mx-auto mb-4 rounded-full"
                     />
-                    <h2 className="text-2xl font-bold mb-2">About</h2>
-                    <p className="muted text-sm">
+                    <h2 className="mb-2 text-2xl font-bold">About</h2>
+                    <p className="text-sm muted">
                         My name is Yaysa—a professional selfware-developer
                         driven by a relentless curiosity and commitment to
                         autonomy. My path has been anything but linear: from
@@ -64,8 +64,8 @@ export default function Home() {
                         ones.
                     </p>
                 </section>
-                <section className="card p-6">
-                    <h2 className="text-xl font-bold mb-3">Projects</h2>
+                <section className="p-6 card">
+                    <h2 className="mb-3 text-xl font-bold">Projects</h2>
                     <ul className="space-y-2">
                         {projects.map((name) => (
                             <li key={name}>
@@ -79,10 +79,10 @@ export default function Home() {
                     </ul>
                 </section>
             </aside>
-            <main className="space-y-6 mt-8 md:mt-0">
+            <main className="mt-8 space-y-6 md:mt-0">
                 <div className="space-y-4">
                     {posts.map((post) => (
-                        <article key={post.slug} className="card p-6 space-y-2">
+                        <article key={post.slug} className="p-6 space-y-2 card">
                             <p className="text-sm muted">{post.displayDate}</p>
                             <h2 className="text-xl font-semibold">
                                 <Link
@@ -91,10 +91,10 @@ export default function Home() {
                                     {post.title}
                                 </Link>
                             </h2>
-                            <p className="muted text-sm">{post.excerpt}</p>
+                            <p className="text-sm muted">{post.excerpt}</p>
                             <Link
                                 href={`/blog/${post.slug}`}
-                                className="text-blue-400 hover:text-blue-300 text-sm">
+                                className="text-sm text-blue-400 hover:text-blue-300">
                                 Read more
                             </Link>
                         </article>

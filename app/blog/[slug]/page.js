@@ -21,7 +21,7 @@ export default async function Page({ params }) {
         // import MDX file
         const { default: Post } = await import(`@/content/posts/${slug}.mdx`);
         return (
-            <article className="prose mx-auto py-8">
+            <article className="py-8 mx-auto prose">
                 <Post />
             </article>
         );

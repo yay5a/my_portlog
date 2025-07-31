@@ -1,6 +1,4 @@
 @import "tailwindcss";
-@tailwind base;
-@tailwind components;
 @tailwind utilities;
 
 /* -------------------------------
@@ -65,7 +63,6 @@ a {
 }
 a:hover {
     color: hsl(var(--accent-2));
-    text-decoration: underline;
     text-underline-offset: 2px;
 }
 
