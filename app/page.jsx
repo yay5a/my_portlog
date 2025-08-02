@@ -1,5 +1,7 @@
 import fs from "fs";
 import path from "path";
+import matter from "gray-matter";
+import BlogCard from "@/components/BlogCard";
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
@@ -14,7 +16,8 @@ export default function Home() {
         .map((file) => {
             const slug = file.replace(/\.mdx$/, "");
             const filePath = path.join(postsDir, file);
-            const content = fs.readFileSync(filePath, "utf8");
+            const raw = fs.readFileSync(filePath, "utf8");
+            const { data: frontmatter, content } = matter(raw);
             const excerpt =
                 content
                     .replace(/\n+/g, " ")
@@ -25,6 +28,7 @@ export default function Home() {
             return {
                 slug,
                 title: slug.replace(/-/g, " "),
+                ...frontmatter,
                 excerpt,
                 date: mtime,
             };
@@ -43,7 +47,7 @@ export default function Home() {
     return (
         <div className="container mx-auto p-4 sm:p-8 md:grid md:grid-cols-[260px_1fr] gap-8 font-[family-name:var(--font-geist-sans)]">
             <aside className="space-y-6">
-                <section className="card p-6 text-center">
+                <section className="p-6 text-center card">
                     <Image
                         src="/self.jpg"
                         alt="Portrait"
@@ -64,23 +68,25 @@ export default function Home() {
                         ones.
                     </p>
                 </section>
-                <section className="p-6 card">
-                    <h2 className="mb-3 text-xl font-bold">Projects</h2>
-                    <ul className="space-y-2">
-                        {projects.map((name) => (
-                            <li key={name}>
-                                <Link
-                                    href="/projects"
-                                    className="link-underline">
-                                    {name}
-                                </Link>
-                            </li>
-                        ))}
-                    </ul>
-                </section>
             </aside>
+
             <main className="mt-8 space-y-6 md:mt-0">
                 <div className="space-y-4">
+                    <h2 className="mb-3 text-xl font-bold">Projects</h2>
+                    <section className="p-6 card">
+                        <ul className="space-y-2">
+                            {projects.map((name) => (
+                                <li key={name}>
+                                    <Link
+                                        href="/projects"
+                                        className="link-underline">
+                                        {name}
+                                    </Link>
+                                </li>
+                            ))}
+                        </ul>
+                    </section>
+                    <h1 className="text-2xl font-bold">Blogs</h1>
                     {posts.map((post) => (
                         <article key={post.slug} className="p-6 space-y-2 card">
                             <p className="text-sm muted">{post.displayDate}</p>

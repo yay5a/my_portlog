@@ -7,16 +7,16 @@ export default function Contact() {
         <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
             <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
                 <div className="min-h-screen bg-background text-foreground">
-                    <section className="flex flex-col items-center sm:items-start gap-4">
+                    <section className="flex flex-col items-center gap-4 sm:items-start">
                         <div className="flex items-center gap-4">
                             <Image
-                                className="w: auto h: auto"
+                                className="w: auto h:"
                                 src="/466858.jpg"
                                 alt="Logo"
                                 width={100}
                                 height={100}
                             />
-                            <h1 className="text-4xl md:text-6xl font-bold text white">
+                            <h1 className="text-4xl font-bold md:text-6xl text white">
                                 Ping me
                             </h1>
                         </div>
@@ -30,12 +30,12 @@ export default function Contact() {
                         <form>
                             <textarea
                                 placeholder="Your message"
-                                className="border p-2 rounded w-full mb-4 resize-none h-32"
+                                className="w-full h-32 p-2 mb-4 border rounded resize-none"
                             />
                             <button
                                 type="submit"
                                 send="message"
-                                className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50 focus:ring-offset-2 focus:ring-offset-background">
+                                className="p-2 text-white transition-colors bg-blue-500 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50 focus:ring-offset-2 focus:ring-offset-background">
                                 Send
                             </button>
                         </form>
@@ -65,7 +65,7 @@ export default function Contact() {
                     </section>
                     <br />
                     <div>
-                        <p className="text-foreground/70 text-sm sm:text-base">
+                        <p className="text-sm text-foreground/70 sm:text-base">
                             If you haven&apos;t already, check out my{" "}
                             <Link
                                 className="text-blue-500 hover:underline"

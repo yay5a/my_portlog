@@ -27,30 +27,6 @@ export default function BlogLayout({ children }) {
 
             {/* Sidebar */}
             <aside className="hidden space-y-8 md:block">
-                {/* <section>
-                    <h2 className="mb-4 text-xl font-semibold text-gray-900 dark:text-white">
-                        Recent Posts
-                    </h2>
-                    <ul className="space-y-2">
-                        {posts.map((post) => (
-                            <li key={post.slug}>
-                                <Link
-                                    href={`/blog/${post.slug}`}
-                                    className="block p-3 transition rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">
-                                    <h3 className="text-lg font-medium text-gray-800 dark:text-gray-200">
-                                        {post.title}
-                                    </h3>
-                                    <time className="text-sm text-gray-500 dark:text-gray-400">
-                                        {new Date(
-                                            post.date
-                                        ).toLocaleDateString()}
-                                    </time>
-                                </Link>
-                            </li>
-                        ))}
-                    </ul>
-                </section> */}
-
                 <section>
                     <h2 className="mb-4 text-xl font-semibold text-gray-900 dark:text-white">
                         About Me
