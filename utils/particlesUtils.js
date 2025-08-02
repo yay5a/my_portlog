@@ -48,7 +48,7 @@ const particleOptions = {
                 mode: "repulse",
                 parallax: {
                     enable: true,
-                    force: 15,
+                    force: 35,
                     smooth: 10,
                 },
             },
@@ -306,7 +306,7 @@ const particleOptions = {
             },
             random: false,
             size: true,
-            speed: 1,
+            speed: 0.5,
             spin: {
                 acceleration: 0,
                 enable: false,
@@ -369,7 +369,7 @@ const particleOptions = {
             animation: {
                 count: 0,
                 enable: true,
-                speed: 3,
+                speed: 1,
                 decay: 0,
                 delay: 0,
                 sync: false,
