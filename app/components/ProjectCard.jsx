@@ -31,9 +31,9 @@ export default function ProjectCard({ title, slug, description, image }) {
                             ? `${title} project image`
                             : description || "Project image"
                     }
-                    width={120}
-                    height={120}
-                    className="mx-auto mb-4 rounded"
+                    width={300}
+                    height={200}
+                    className="object-contain mx-auto mb-4 rounded"
                 />
             </div>
             <p className="mb-3 text-sm text-slate-700">{description}</p>
