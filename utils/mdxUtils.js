@@ -4,7 +4,7 @@ import matter from "gray-matter";
 
 const CONTENT_DIR = path.join(process.cwd(), "content");
 
-export function getMdxContent({
+export async function getMdxContent({
     directory,
     limit = undefined,
     includeExcerpt = false,
@@ -67,18 +67,18 @@ export function getMdxContent({
     return limitedContent;
 }
 
-export function getBlogPosts(limit = 3) {
+export async function getBlogPosts(options = {}) {
     return getMdxContent({
         directory: "posts",
-        limit,
         includeExcerpt: true,
         useMtime: true,
+        ...options,
     });
 }
 
-export function getProjects(limit = 3) {
+export async function getProjects(options = {}) {
     return getMdxContent({
         directory: "projects",
-        limit,
+        ...options,
     });
 }

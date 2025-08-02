@@ -4,9 +4,9 @@ import React from "react";
 import Image from "next/image";
 import { getBlogPosts, getProjects } from "@/utils/mdxUtils";
 
-export default function Home() {
-    const posts = getBlogPosts(3);
-    const projects = getProjects(3);
+export default async function Home() {
+    const posts = await getBlogPosts({ limit: 3 });
+    const projects = await getProjects({ limit: 2 });
 
     return (
         <div className="container mx-auto p-4 sm:p-8 md:grid md:grid-cols-[260px_1fr] gap-8 font-[family-name:var(--font-geist-sans)]">

@@ -1,20 +1,16 @@
 import Link from "next/link";
 import Image from "next/image";
-import { notFound } from "next/navigation";
 import "../globals.css";
-import fs from "fs";
-import path from "path";
+import { getBlogPosts } from "@/utils/mdxUtils";
+import { use } from "react";
 
 export const metadata = {
     title: "Yaysa&apos;s • Blog ",
 };
 
 export default function BlogLayout({ children }) {
-    const postsDir = path.join(process.cwd(), "content", "posts");
-    const files = fs.readdirSync(postsDir);
-
-    // Sort posts by date descending
-    const posts = files
+    // Await blog posts using React's experimental use() hook
+    const posts = use(getBlogPosts())
         .sort((a, b) => new Date(b.date) - new Date(a.date))
         .slice(0, 5);
 
