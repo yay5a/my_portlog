@@ -1,49 +1,12 @@
-import fs from "fs";
-import path from "path";
-import matter from "gray-matter";
 import BlogCard from "@/components/BlogCard";
 import ProjectCard from "@/components/ProjectCard";
 import React from "react";
-import Link from "next/link";
 import Image from "next/image";
+import { getBlogPosts, getProjects } from "@/utils/mdxUtils";
 
 export default function Home() {
-    const postsDir = path.join(process.cwd(), "content", "posts");
-    const files = fs
-        .readdirSync(postsDir)
-        .filter((file) => file.endsWith(".mdx"));
-
-    const posts = files
-        .map((file) => {
-            const slug = file.replace(/\.mdx$/, "");
-            const filePath = path.join(postsDir, file);
-            const raw = fs.readFileSync(filePath, "utf8");
-            const { data: frontmatter, content } = matter(raw);
-            const excerpt =
-                content
-                    .replace(/\n+/g, " ")
-                    .split(/\s+/)
-                    .slice(0, 20)
-                    .join(" ") + "...";
-            const { mtime } = fs.statSync(filePath);
-            return {
-                slug,
-                title: slug.replace(/-/g, " "),
-                ...frontmatter,
-                excerpt,
-                date: mtime,
-            };
-        })
-        .sort((a, b) => b.date - a.date)
-        .map((post) => ({
-            ...post,
-            displayDate: post.date.toLocaleString("en-US", {
-                month: "short",
-                day: "numeric",
-            }),
-        }));
-
-    const projects = ["Project 1", "Project 2", "Project 3"];
+    const posts = getBlogPosts(3);
+    const projects = getProjects(3);
 
     return (
         <div className="container mx-auto p-4 sm:p-8 md:grid md:grid-cols-[260px_1fr] gap-8 font-[family-name:var(--font-geist-sans)]">
@@ -73,20 +36,28 @@ export default function Home() {
 
             <main className="mt-8 space-y-6 md:mt-0">
                 {/* Projects section */}
-                {projects.map((name) => (
-                    <ProjectCard key={name} name={name} />
-                ))}
-
+                <section className="space-y-6">
+                    <h2 className="mb-3 text-xl font-bold">Latest Projects</h2>
+                    {projects.map((project) => (
+                        <ProjectCard key={project.slug} {...project} />
+                    ))}
+                </section>
+                <hr />
                 {/* Blog posts */}
-                {posts.map((post) => (
-                    <BlogCard
-                        key={post.slug}
-                        title={post.title}
-                        date={post.displayDate}
-                        excerpt={post.excerpt}
-                        slug={post.slug}
-                    />
-                ))}
+                <section className="space-y-6">
+                    <h2 className="mb-3 text-xl font-bold">
+                        Latest Blog Posts
+                    </h2>
+                    {posts.map((post) => (
+                        <BlogCard
+                            key={post.slug}
+                            title={post.title}
+                            date={post.displayDate}
+                            excerpt={post.excerpt}
+                            slug={post.slug}
+                        />
+                    ))}
+                </section>
             </main>
         </div>
     );
