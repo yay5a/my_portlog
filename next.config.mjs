@@ -6,6 +6,11 @@ import remarkMdxFrontmatter from "remark-mdx-frontmatter";
 const nextConfig = {
     pageExtensions: ["js", "jsx", "ts", "tsx", "md", "mdx"],
     reactStrictMode: true,
+    transpilePackages: [
+        "@tsparticles/react",
+        "@tsparticles/engine",
+        "@tsparticles/slim", // or '@tsparticles/all' / 'tsparticles'
+    ],
 };
 
 const withMDX = createMDX({

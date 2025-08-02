@@ -1,5 +1,6 @@
 import React from "react";
 import Nav from "@/components/Nav";
+import Particles from "@/components/Particles";
 import "./globals.css";
 
 export const metadata = {
@@ -12,6 +13,7 @@ export default function RootLayout({ children }) {
     return (
         <html lang="en">
             <body className="antialiased">
+                <Particles />
                 <Nav />
                 {children}
                 <footer>
