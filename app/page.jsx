@@ -2,6 +2,7 @@ import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
 import BlogCard from "@/components/BlogCard";
+import ProjectCard from "@/components/ProjectCard";
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
@@ -71,41 +72,21 @@ export default function Home() {
             </aside>
 
             <main className="mt-8 space-y-6 md:mt-0">
-                <div className="space-y-4">
-                    <h2 className="mb-3 text-xl font-bold">Projects</h2>
-                    <section className="p-6 card">
-                        <ul className="space-y-2">
-                            {projects.map((name) => (
-                                <li key={name}>
-                                    <Link
-                                        href="/projects"
-                                        className="link-underline">
-                                        {name}
-                                    </Link>
-                                </li>
-                            ))}
-                        </ul>
-                    </section>
-                    <h1 className="text-2xl font-bold">Blogs</h1>
-                    {posts.map((post) => (
-                        <article key={post.slug} className="p-6 space-y-2 card">
-                            <p className="text-sm muted">{post.displayDate}</p>
-                            <h2 className="text-xl font-semibold">
-                                <Link
-                                    href={`/blog/${post.slug}`}
-                                    className="link-underline">
-                                    {post.title}
-                                </Link>
-                            </h2>
-                            <p className="text-sm muted">{post.excerpt}</p>
-                            <Link
-                                href={`/blog/${post.slug}`}
-                                className="text-sm text-blue-400 hover:text-blue-300">
-                                Read more
-                            </Link>
-                        </article>
-                    ))}
-                </div>
+                {/* Projects section */}
+                {projects.map((name) => (
+                    <ProjectCard key={name} name={name} />
+                ))}
+
+                {/* Blog posts */}
+                {posts.map((post) => (
+                    <BlogCard
+                        key={post.slug}
+                        title={post.title}
+                        date={post.displayDate}
+                        excerpt={post.excerpt}
+                        slug={post.slug}
+                    />
+                ))}
             </main>
         </div>
     );
