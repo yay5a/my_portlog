@@ -21,6 +21,7 @@ export default function Contact() {
                             </h1>
                         </div>
                     </section>
+                    <br />
                     <p className="text-foreground/70 text-lg sm:text-xl max-w-2xl mb-8 tracking-[-.01em]">
                         to collaborate, or just to say hello! I&apos;m always
                         open to connecting with fellow developers and
@@ -63,7 +64,7 @@ export default function Contact() {
                             </li>
                         </ul>
                     </section>
-                    <br />
+                    {/* <br />
                     <div>
                         <p className="text-sm text-foreground/70 sm:text-base">
                             If you haven&apos;t already, check out my{" "}
@@ -74,7 +75,7 @@ export default function Contact() {
                             </Link>{" "}
                             for some shower thoughts and other musings.
                         </p>
-                    </div>
+                    </div> */}
                 </div>
             </main>
         </div>
