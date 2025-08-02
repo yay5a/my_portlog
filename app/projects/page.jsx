@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { getProjects } from "../../utils/mdxUtils";
 import ProjectCard from "../components/ProjectCard";
 
@@ -12,6 +13,7 @@ export default async function ProjectPage() {
                     key={project.slug}
                     title={project.title}
                     description={project.description}
+                    image={project.image}
                     slug={project.slug}
                 />
             ))}

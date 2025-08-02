@@ -21,7 +21,11 @@ export default function ProjectCard({ title, slug, description, image }) {
             </h3>
             <div className="mb-4">
                 <Image
-                    src="/self.jpg" // Replace with image URL if provided
+                    src={
+                        image?.endsWith(".jpg") || image?.endsWith(".png")
+                            ? image
+                            : `/content/projects/${image}`
+                    } // Supports both absolute and relative URLs
                     alt={
                         title
                             ? `${title} project image`
@@ -32,8 +36,8 @@ export default function ProjectCard({ title, slug, description, image }) {
                     className="mx-auto mb-4 rounded"
                 />
             </div>
-            <p className="mb-3 text-sm text-slate-300">{description}</p>
-            <Link href={`/project/${slug}`} className="text-sm">
+            <p className="mb-3 text-sm text-slate-700">{description}</p>
+            <Link href={`/projects/${slug}`} className="text-sm">
                 View project
             </Link>
         </article>
