@@ -17,15 +17,8 @@ export default function Nav() {
         <nav className="relative top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-black/[.08] dark:border-white/[.145]">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between items-center h-16">
-                    {/* Logo */}
-                    <Link
-                        href="/"
-                        className="text-xl font-bold text-foreground hover:opacity-80 transition-opacity">
-                        Portfolio
-                    </Link>
-
                     {/* Desktop Navigation */}
-                    <div className="hidden md:flex space-x-8">
+                    <div className="w-full flex items-center justify-start pl-8 space-x-8">
                         {navItems.map((item) => (
                             <Link
                                 key={item.href}
@@ -35,6 +28,22 @@ export default function Nav() {
                             </Link>
                         ))}
                     </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
                     {/* Mobile menu button */}
                     <button
