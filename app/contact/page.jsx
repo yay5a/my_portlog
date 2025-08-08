@@ -1,8 +1,35 @@
+'use client';
+
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
 
-export default function Contact() {
+import { useState } from 'react';
+
+export default function ContactForm() {
+    const [message, setMessage] = useState('');
+    const [name, setName] = useState('');
+    const [email, setEmail] = useState('');
+    const [status, setStatus] = useState(null);
+
+    async function submit(e) {
+        e.preventDefault();
+        setStatus('Sending…');
+        const res = await fetch('/api/contact', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, email, message, website: '' }), // website = honeypot
+        });
+        const data = await res.json();
+        if (!res.ok) setStatus(data.error || 'Error');
+        else {
+            setStatus('Sent!');
+            setMessage('');
+            setName('');
+            setEmail('');
+        }
+    }
+
     return (
         <section className="relative min-h-screen grid grid-rows-[20px_1fr_20px] items-center justify-items-center p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
             <Image
@@ -26,17 +53,46 @@ export default function Contact() {
                         to connecting with fellow developers and enthusiasts.
                     </p>
                     <section>
-                        <form>
+                        <form onSubmit={submit} className="space-y-3 max-w-xl">
+                            <input
+                                type="text"
+                                name="name"
+                                placeholder="Name (optional)"
+                                value={name}
+                                onChange={(e) => setName(e.target.value)}
+                                className="w-full rounded border px-3 py-2"
+                            />
+                            <input
+                                type="email"
+                                name="email"
+                                placeholder="Email (optional)"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                className="w-full rounded border px-3 py-2"
+                            />
+                            {/* Honeypot – hide with CSS, not type="hidden" so bots see it */}
+                            <div className="sr-only" aria-hidden="true">
+                                <label>
+                                    Website
+                                    <input name="website" tabIndex={-1} autoComplete="off" />
+                                </label>
+                            </div>
                             <textarea
-                                placeholder="Your message"
-                                className="w-full h-32 p-2 mb-4 border rounded resize-none"
+                                required
+                                maxLength={280}
+                                value={message}
+                                onChange={(e) => setMessage(e.target.value)}
+                                placeholder="Say hi (280 chars max, no links)…"
+                                className="w-full rounded border px-3 py-2"
                             />
                             <button
                                 type="submit"
-                                send="message"
-                                className="p-2 text-white transition-colors rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50 focus:ring-offset-2 focus:ring-offset-background">
+                                disabled={!message || message.length > 280}
+                                className="rounded px-4 py-2 bg-black text-white disabled:opacity-50"
+                            >
                                 Send
                             </button>
+                            {status && <p className="text-sm">{status}</p>}
                         </form>
                     </section>
                 </div>
