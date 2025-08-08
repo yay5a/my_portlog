@@ -4,6 +4,32 @@ import matter from "gray-matter";
 
 const CONTENT_DIR = path.join(process.cwd(), "content");
 
+function makeMarkdownExcerpt(md, { maxWords = 40 } = {}) {
+    if (!md) return "";
+
+    const para = md
+        .split(/\r?\n\r?\n+/)
+        .map(s => s.trim())
+        .find(s => s.length > 0) || "";
+
+    const words = para.replace(/\s+/g, " ").split(" ");
+    const sliced = words.slice(0, maxWords).join(" ");
+    let out = sliced + (words.length > maxWords ? "…" : "");
+
+    const openStars = (out.match(/\*\*/g) || []).length;
+    if (openStars % 2 === 1) out = out.replace(/\*\*?$/, "");
+
+    const openUnders = (out.match(/__/g) || []).length;
+    if (openUnders % 2 === 1) out = out.replace(/_+$/, "");
+
+    const backticks = (out.match(/`/g) || []).length;
+    if (backticks % 2 === 1) out = out.replace(/`+$/, "");
+
+    return out;
+}
+
+
+
 export async function getMdxContent({
     directory,
     limit = undefined,
@@ -27,13 +53,7 @@ export async function getMdxContent({
         };
 
         if (includeExcerpt) {
-            const excerpt =
-                content
-                    .replace(/\n+/g, " ")
-                    .split(/\s+/)
-                    .slice(0, excerptLength)
-                    .join(" ") + "...";
-            baseData.excerpt = excerpt;
+            baseData.excerpt = makeMarkdownExcerpt(content, { maxWords: excerptLength });
         }
 
         if (useMtime) {
