@@ -1,4 +1,6 @@
 import Link from "next/link";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 /**
  *
@@ -18,7 +20,14 @@ export default function BlogCard({ title, date, excerpt, slug }) {
                     {title}
                 </Link>
             </h3>
-            <p className="mb-3 text-sm text-slate-300">{excerpt}</p>
+
+            <div className="mb-3 text-sm text-slate-300 prose dark:prose-invert max-w-none">
+                <ReactMarkdown
+                    remarkPlugins={[remarkGfm]}
+                >
+                    {excerpt}
+                </ReactMarkdown>
+            </div>
             <Link href={`/blog/${slug}`} className="text-sm">
                 Read more
             </Link>
