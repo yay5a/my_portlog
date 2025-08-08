@@ -41,12 +41,21 @@ export async function getMdxContent({
             baseData.date = mtime;
         }
 
+        const stats = fs.statSync(filePath);
+        const fmDate = frontmatter?.date ? new Date(frontmatter.date) : null;
+
+        const created = stats.birthtime ?? stats.ctime ?? stats.mtime;
+        const modified = stats.mtime;
+
+        baseData.date = fmDate || (useMtime ? modified : created);
+        baseData.modifiedAt = modified;
+
         return baseData;
     });
 
     const sortedContent = content.sort((a, b) => {
-        const dateA = useMtime ? a.date : new Date(a.date);
-        const dateB = useMtime ? b.date : new Date(b.date);
+        const dateA = new Date(a.date);
+        const dateB = new Date(b.date);
         return dateB - dateA;
     });
 
@@ -57,7 +66,8 @@ export async function getMdxContent({
     if (useMtime) {
         return limitedContent.map((item) => ({
             ...item,
-            displayDate: item.date.toLocaleString("en-US", {
+            displayDate: new Date(item.date).toLocaleString("en-US", {
+                year: "numeric",
                 month: "short",
                 day: "numeric",
             }),
@@ -71,7 +81,7 @@ export async function getBlogPosts(options = {}) {
     return getMdxContent({
         directory: "posts",
         includeExcerpt: true,
-        useMtime: true,
+        useMtime: false,
         ...options,
     });
 }
