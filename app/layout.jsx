@@ -5,6 +5,7 @@ import "./globals.css";
 import { SiGithub } from "react-icons/si";
 import { SiLinkedin } from "react-icons/si";
 import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 export const metadata = {
 	title: "Yaysa's Portfolio-log",
@@ -19,6 +20,7 @@ export default function RootLayout({ children }) {
 				<Particles />
 				<Nav />
 				{children}
+				<SpeedInsights />
 				<Analytics />
 				<footer>
 					{/* Social Links Section */}
