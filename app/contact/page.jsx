@@ -15,18 +15,31 @@ export default function ContactForm() {
 	async function submit(e) {
 		e.preventDefault();
 		setStatus("Sending…");
-		const res = await fetch("/api/contact", {
-			method: "POST",
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({ name, email, message, website: "" }), // website = honeypot
-		});
-		const data = await res.json();
-		if (!res.ok) setStatus(data.error || "Error");
-		else {
-			setStatus("Sent!");
-			setMessage("");
-			setName("");
-			setEmail("");
+		try {
+			const res = await fetch("/api/contact", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ name, email, message, website: "" }), // website = honeypot
+			});
+
+			let data = {};
+			try {
+				data = await res.json();
+			} catch (err) {
+				// Non-JSON response
+				console.error("Failed to parse response JSON", err);
+			}
+
+			if (!res.ok) setStatus(data.error || "Error");
+			else {
+				setStatus("Sent!");
+				setMessage("");
+				setName("");
+				setEmail("");
+			}
+		} catch (err) {
+			console.error("Contact form submission failed", err);
+			setStatus("Error");
 		}
 	}
 
