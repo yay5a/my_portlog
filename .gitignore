@@ -1,5 +1,11 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
+CLAUDE.md
+CLAUDE.mdZone.Identifier
+coding-mentor-02.txt
+coding-mentor-pilot01.txt
+instructions.md
+
 # dependencies
 /node_modules
 /.pnp
