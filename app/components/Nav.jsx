@@ -9,6 +9,7 @@ export default function Nav() {
     const navItems = [
         { href: "/", label: "Home" },
         { href: "/projects", label: "Projects" },
+        { href: "/reports", label: "Reports" },
         { href: "/blog", label: "Blog" },
         { href: "/contact", label: "Contact" },
     ];
@@ -23,33 +24,19 @@ export default function Nav() {
                             <Link
                                 key={item.href}
                                 href={item.href}
-                                className="text-foreground hover:text-foreground/70 transition-colors font-medium">
+                                className="text-foreground hover:text-foreground/70 transition-colors font-medium"
+                            >
                                 {item.label}
                             </Link>
                         ))}
                     </div>
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
                     {/* Mobile menu button */}
                     <button
                         onClick={() => setIsMenuOpen(!isMenuOpen)}
                         className="md:hidden p-2 rounded-md text-foreground hover:bg-foreground/10 transition-colors"
-                        aria-label="Toggle menu">
+                        aria-label="Toggle menu"
+                    >
                         <svg
                             className="h-6 w-6"
                             fill="none"
@@ -57,7 +44,8 @@ export default function Nav() {
                             strokeLinejoin="round"
                             strokeWidth="2"
                             viewBox="0 0 24 24"
-                            stroke="currentColor">
+                            stroke="currentColor"
+                        >
                             {isMenuOpen ? (
                                 <path d="M6 18L18 6M6 6l12 12" />
                             ) : (
@@ -76,7 +64,8 @@ export default function Nav() {
                                     key={item.href}
                                     href={item.href}
                                     className="text-foreground hover:text-foreground/70 transition-colors font-medium py-2"
-                                    onClick={() => setIsMenuOpen(false)}>
+                                    onClick={() => setIsMenuOpen(false)}
+                                >
                                     {item.label}
                                 </Link>
                             ))}

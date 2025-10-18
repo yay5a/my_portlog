@@ -1,0 +1,99 @@
+---
+title: "Unexplained 50 TB Upstream Data Transfer Investigation"
+author: "Mohammed Asad Bhimjee (yay5a)"
+date: "2025-09-26T19:30:00Z"
+tags: ["Network Forensics", "PCAP Analysis", "Wireshark", "Anomaly Detection", "SOHO"]
+summary: "Comprehensive report on a large-scale upstream data anomaly; quantified traffic, eliminated hypotheses, implemented monitoring and mitigation controls."
+---
+> Sensitive identifiers (WAN IPs, MACs, hostnames) have been anonymized.
+
+## Executive Summary
+During routine bandwidth-usage reviews, a ~50 TB upstream data transfer was detected on the household connection.  
+The objective was to determine the cause of the abnormal traffic, rule out compromise or configuration error, and harden the network against recurrence.  
+
+Although the root cause could not be conclusively identified, the investigation produced verifiable metrics, reusable capture workflows, and improved egress-monitoring controls.
+
+## Objectives
+1. Quantify the time span, rate, and endpoints of the upload.  
+2. Determine whether traffic originated from local devices or the ISP edge.  
+3. Identify or eliminate likely sources (cloud backup, malware, IoT, routing loop).  
+4. Implement preventative monitoring and documentation procedures.
+
+## Network Inventory
+
+| Device | OS | Role |
+|---------|----|------|
+| Windows 11 | Host | Primary workstation, capture mirror |
+| Kali Linux | VM | PCAP triage, script testing |
+| Fedora 42 | Workstation | Secondary capture / analysis node |
+| Netgear GS108E | Switch | Managed; port mirroring / VLANs |
+| Eero Max 7 | Router | Gateway / NAT |
+| IoT Cluster | Mixed (Ring, HP Printer, Ecobee) | Background chatter candidates |
+
+## Tools & Scripts
+- tshark / dumpcap – packet capture and rotation (ring buffer)  
+- Python & C utilities – triage_parser.py, ip_extractor.c for per-host byte counts  
+- Wireshark – visual inspection of flow distribution  
+- nmap / arp-scan – endpoint enumeration  
+- AI-assisted documentation – drafted checklists & parsing snippets; manually verified  
+
+## Investigation Timeline
+- Aug 27th, 2025 through Sept 19th, 2025
+
+### Detection
+ISP router portal revealed ≈ 50 TB total upstream from June through Sept.  
+Router bandwidth usage confirmed elevated outbound rates intermittently; the highest was 27.7 TB throughout August.
+
+### Data Collection
+- Enabled SPAN on managed switch mirroring port 1 to NIC configured for network sniffing; capture files stored on external 5 TB external drive.  
+- Intermittently captured continuous traffic via ring buffer (`dumpcap -i eth0 -w /media/sf_E_DRIVE/captures/overnight_.pcapng -b filesize:500000`).  
+- *Learning Curve*: Misconfigured capture topology resulted in simulated ARP storm; triaged and resolved within a couple hours. Captured network traffic were inconsistent throughout investigation, i.e. some capture sessions were utilized through Wireshark or `dumpcap` with or without capture filters.
+
+### Quantification
+- Packets predominantly TCP 443 (TLS 1.3) with varied SNI entries or encrypted QUIC traffic.  
+- Multiple internal IPs observed, some sustaining continuous QUIC sessions.
+
+### Hypothesis Testing
+| Hypothesis | Test | Result |
+|-------------|------|--------|
+| Cloud backup / OneDrive sync | Checked sync logs; disabled clients | No correlation |
+| Malware or P2P process | Windows Defender + Malwarebytes scans; process monitor | Clean |
+| IoT video relay (Ring) | Disconnected cameras individually from network | No drop in throughput |
+| Routing loop / ISP mirror bug | Coordinated with ISP network engineer | Inconclusive |
+| Local misconfiguration | Audited shares & scheduled tasks | No anomalous jobs found |
+
+### Consultation
+- Opened ticket with ISP; provided graphs and timestamps.  
+- Contacted a Cybersecurity Instructor at a local technical school for review of methodology and next-step suggestions.
+
+### Analysis Challenges
+- Aggregated parser output lacked per-flow correlation fields (SNI ↔ IP ↔ process).  
+- Dataset too large to visualize fully on available hardware.  
+- Investigation closed as “unresolved; mitigations applied.”
+
+## Implemented Controls
+1. Egress-rate alerting via router API polling and email triggers.  
+2. IoT isolation.
+3. Runbook documenting capture setup, validation, and escalation paths.
+
+## Findings
+- Traffic pattern consistent with aggregated encrypted sessions (possibly router service telemetry or cloud relay).  
+- No evidence of credential compromise or local malware.  
+- Environment hardened and baselined for future anomalies.
+
+## Lessons Learned
+- Quantification and documentation provide value even without attribution.  
+- Hardware-level mirroring + rolling captures (using consistent methodology) are essential for post-event forensics.  
+- Effective forensics requires contextual knowledge of normal traffic—improved via smaller scheduled captures.  
+- Human review remains critical where AI or automated parsers may lack.
+
+## Next Steps
+1. Post sanitized dataset for peer insight.  
+2. Continue searching for mentorship to refine forensic methodology.
+
+## Appendix A — Evidence (to be added)
+A1. ISP portal screenshots (June–Sept totals; August daily view)
+A2. Gateway usage page (outbound spikes)
+A3. Parsed pcap summaries (top talkers, SNI, 443 split)
+A4. Timeline heatmap (bytes per hour)
+

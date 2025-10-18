@@ -1,0 +1,112 @@
+---
+title: "How I Found a Forgotten IoT Device on My Network — and What It Taught Me About Cybersecurity"
+description: "An entrepreneurial dive into network security from a real-world perspective."
+date: "2025-07-06T23:55:00-05:00"
+tags: ["CyberSecurity","IoT","Pentest","Wireshark","Nmap","HomeLab","CareerLaunch","Control4"]
+---
+> Sensitive identifiers (WAN IPs, MACs, hostnames) have been anonymized.
+
+## It All Started with a Lost Hotmail Login
+
+I was trying to access an old Xbox Game Pass account tied to a Hotmail address. The password was long gone from my memory, and Microsoft's recovery process wasn't sending me the verification code. But weirdly enough, when I opened Outlook in my browser... I was in. No password. No code. Just a browser session with access to my inbox.
+
+That got my gears turning. Was this a session token? Cookie residue? An oversight in Microsoft’s login flow? I didn’t want to go down a legal rabbit hole messing with live services, so I did what any curious cybersecurity enthusiast would do: I started passively watching my own network.
+
+---
+##  Wireshark, and a Mystery Device
+
+
+While capturing traffic with Wireshark on Kali Linux, I initially wasn't using any specific filters — just watching network traffic during the Xbox login attempt, curious to see if any packets tied to Microsoft’s services would stand out. Instead, what caught my eye was something unrelated and unexpected: a strange IP address, 192.168.1.x, generating persistent broadcast traffic across the LAN.
+
+Weirder still? This device wasn’t listed in my router’s connected devices. Ghost traffic.
+
+I ran a scan with nmap:
+
+```bash
+sudo nmap -A 192.168.1.x
+```
+
+---
+
+## The Device: An Old Control4 Smart Home Hub
+| Open Port | Service |
+|-----------|---------|
+| 22        | Dropbear SSH (2016) |
+| 80, 443   | nginx 1.10.3 |
+| 139, 445  | Samba with guest access and no signing |
+| 5100–6000 | Custom Control4 ports |
+
+- OS: Embedded Linux Kernel 3.x–4.x
+- MAC Vendor: Control4 (smart home company)
+- TLS Cert CN: `ca1-000FFF51EAD3`
+
+This was a forgotten Control4 controller that came with the house when my family bought it in 2020. The service trial had long expired. Yet it was still powered on and chatting like it was relevant.
+
+--- 
+
+## Why This Matters
+
+This thing:
+- Exposed guest SMB shares
+- Used an old SSH daemon
+- Broadcasted UPnP discovery messages
+- Was invisible to the router UI
+
+**This is how real-world vulnerabilities hide in plain sight.** Forgotten IoT gear becomes low-hanging fruit for lateral movement, botnets, and device pivots — especially in larger networks.
+
+--- 
+
+## Bonus Twist: The Microsoft Login Anomaly
+
+Remember the original Hotmail login issue? I never typed the password. Yet I got inbox access.
+
+Theories:
+- Persistent SSO session token 
+- Browser cookie reuse
+- Microsoft flowToken leak
+
+Whatever the cause, it raises flags about account recovery, session expiration, and token scope. I noted the behavior but avoided poking the bear.
+
+Needless to say, I was able to remember the password after a guessing which one of my 16 character alphanumeric with symbols passwords was the one, and changed it. As well as setting up a secondary email for account recovery. 
+
+--- 
+
+## Tools I Used
+
+- Kali Linux in VirtualBox
+- Wireshark & tshark
+- nmap
+- Google Chrome DevTools
+
+--- 
+
+## What I Took Away
+| Skill Learned | Real-World Application |
+|---------------|------------------------|
+| Passive recon | Discovering ghost devices on a LAN |
+| Device enumeration | Full nmap fingerprint of an embedded system |
+| Risk assessment | Identifying exposure via SMB and UPnP |
+| Responsible scope | Avoiding gray areas with real login systems |
+
+This wasn’t a CTF. It was live. It was mine. And it was real.
+
+--- 
+
+## Final Strategic Pivot
+
+Although VLAN isolation was considered for deeper control, my router's limitations and the scenario’s edge-case nature made it unnecessary to over-engineer the environment. Instead, emphasis remained on observation, documentation, and applied analysis within a realistic home setup.
+
+This decision reflects the entrepreneurial principle of knowing when to stop building infrastructure and start extracting value.
+
+--- 
+
+## Final Thought
+
+This all started with a forgotten Xbox login.
+
+Curiosity, critical thinking, and a few basic tools turned this into a meaningful security analysis. That’s what growth looks like when you take initiative—you explore document, and learn by doing.
+
+---
+
+Tags: #CyberSecurity #IoT #Pentest #Wireshark #Nmap #HomeLab #CareerLaunch #Control4
+
