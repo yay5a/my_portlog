@@ -1,0 +1,62 @@
+---
+title: "Technical Report: Rogue SSID Detection and Network Investigation"
+author: "Yaysa"
+date: "2025-04-08"
+environment: "Home Network Lab — Kali Linux (Kali-L), Fedora Linux (Fedora-L), Netgear GS108E, Luxul XAP-810 (PoE)"
+tags: ["Network", "Wireless", "SSID", "Security", "Investigation", "HomeLab", "Luxul"]
+---
+> Sensitive identifiers (WAN IPs, MACs, hostnames) have been anonymized.
+
+## Executive Summary
+This investigation was launched upon the discovery of legacy SSIDs (e.g., `NETGEAR16`) still being broadcast despite decommissioning the corresponding hardware. The objective was to identify the source of the phantom SSIDs, trace network pathways, and determine whether rogue or misconfigured devices were present.
+
+## Objectives
+1. Detect device(s) broadcasting legacy SSIDs  
+2. Capture BSSID, signal strength, and channel information  
+3. Determine if the device is rogue or misconfigured  
+4. Use VLAN and subnetting techniques to isolate traffic  
+5. Learn and apply core network administration concepts throughout
+
+## Network Inventory
+| Device   | Name     | OS          | Role                       |
+|----------|----------|-------------|----------------------------|
+| Desktop  | Host     | Windows 11  | VirtualBox Host            |
+| VM       | Kali-L   | Kali Linux  | Wired interface + scans    |
+| Laptop 1 | Fedora-L | Fedora      | Wireless scanning          |
+| Laptop 2 | Kali-L2  | Kali Linux  | Future management node     |
+| AP       | Luxul    | N/A         | Suspected rogue AP         |
+| Switch   | GS8      | Netgear     | VLAN-capable switch        |
+
+## Tools Used
+- `airmon-ng`, `airodump-ng` (wireless reconnaissance)  
+- `arp-scan`, `nmap`, `ip`, `ethtool`, `Wireshark`  
+- Browser-based access for suspected IPs  
+- MAC OUI lookups via local database `grep`
+
+## Investigation Steps
+1. **Initial Recon with Fedora-L**  
+   Enabled monitor mode on `wlo1`; used `airodump-ng` to capture SSID/BSSID/channel data. Identified phantom SSID: `NETGEAR16` / BSSID: `A4:13:4E:…`.
+2. **OUI Lookup**  
+   MAC prefix `A4:13:4E` mapped to vendor **Luxul**.
+3. **Physical Device Inspection**  
+   Located Luxul XAP-810 AP in cable closet; verified MAC matched broadcaster.
+4. **Wired Testing with GS8 + Kali-L**  
+   Confirmed link state; set static IP `192.168.0.x/x`; attempted management at `192.168.0.x` (Luxul default) — no response.
+5. **Power over Ethernet**  
+   Reconnected Luxul to original PoE drop; power/boot confirmed (green LED).
+6. **Subnet Preference Fix**  
+   Routing table favored Wi-Fi; disabled Wi-Fi to ensure L2 isolation.
+7. **ARP & DHCP Discovery**  
+   `arp-scan` identified `192.168.0.x`; device still unreachable from scanning segment.
+8. **Hypothesis**  
+   AP likely reset or entered bridge/DHCP mode; next step is to move Kali-L to the PoE-connected LAN for direct capture or factory reset the AP.
+
+## Conclusion
+The Luxul AP was the source of the legacy SSID broadcasts. Its relocation/config state likely placed it in bridge/DHCP mode, making it unreachable from the scanning segment. Next actions: move the analyzer to the PoE switch or factory reset for administrative access.
+
+## Lessons Learned
+- Layer-2 visibility is crucial for ARP/DHCP discovery  
+- Wireless SSIDs can persist due to misconfigured or forgotten APs  
+- VLANs/subnets require proper routing and placement to be effective  
+- Always verify power delivery first with suspected PoE devices
+
