@@ -14,7 +14,7 @@ Most of what I build is about understanding how systems communicate—and how to
 
 ## Featured Projects & Reports
 - **[50 TB Upload Investigation](https://yay5a.vercel.app/reports/50TB_Upstream_Investigation_Report)** – Technical report analyzing an unexpected multi-terabyte upstream data event.
-- **Home-Made-Delites** – A family-run web project built while learning the basics of frontend and deployment.
+- **[Home-Made-Delites](https://hmdelites.vercel.app/)** – A family-run web project built while learning the basics of frontend and deployment.
 
 ---
 
