@@ -7,6 +7,11 @@ summary: "A report of my naive attempt at investigating a massive upstream of da
 ---
 > Sensitive identifiers (WAN IPs, MACs, hostnames) have been anonymized.
 
+## Accountability Statement
+This investigation followed **AI/LLM guidance** that placed the capture **on a LAN branch**, not the WAN path. I did not recognize this limitation at the outset. The resulting dataset was incapable of answering the attribution question. This report corrects the record and documents the proper WAN‑capture requirements for any future incident.
+
+---
+
 ## Executive Summary
 - The ISP/router application *(Eero)* reported ~**50 TB of uploaded data** across ~June–September, peaking in **August**.
 - I attempted to capture network traffic from a **SPAN port on a Netgear GS108E**.
@@ -15,6 +20,14 @@ summary: "A report of my naive attempt at investigating a massive upstream of da
 - **Main lesson:** Do **not** rely on AI instructions for unfamiliar domains. **Not understanding** what tools & equipment I had on hand, their limitations (*i.e.  bottlenecks*), as well as how to configure them, was my biggest blunder.
 
 ---
+
+## Lessons Learned (Primary)
+- **Do not trust AI to instruct you in unfamiliar domains without verification.**
+- **Segment and *timing*** is key; volume establishes baselines.
+- **Consumer devices lack many features *(or cost a lot of $$)* that many *enterprise-level* devices have out of the box.**
+
+---
+
 
 ## Scope
 - **ISP/router application *(Eero)* totals:**
@@ -102,20 +115,10 @@ Operational notes:
 
 ---
 
-## Lessons Learned (Primary)
-- **Do not trust AI to instruct you in unfamiliar domains without verification.**
-- **Segment and *timing*** is key; volume establishes baselines.
-- **Consumer devices lack many features *(or cost a lot of $$)* that many *enterprise-level* devices have out of the box.**
-
----
-
-## Accountability Statement
-This investigation followed **AI/LLM guidance** that placed the capture **on a LAN branch**, not the WAN path. I did not recognize this limitation at the outset. The resulting dataset was incapable of answering the attribution question. This report corrects the record and documents the proper WAN‑capture requirements for any future incident.
-
 ---
 
 ## Appendix — Evidence
-A1. ISP portal screenshots (Jun–Oct monthly totals)
+A1. ISP portal screenshots (Jun–Sep anomaly window; **Oct shown only as post-support baseline**)
 ![screenshot of montly total data usage](/strange_.png)
 
 ---
