@@ -232,3 +232,22 @@ body::after {
   backdrop-filter: saturate(1.2) blur(8px);
   border-bottom: 1px solid rgb(255 255 255 / 0.05);
 }
+
+/* Make MDX/Markdown images fill the text container and stay responsive */
+.prose :where(img):not(:where(.not-prose *)) {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Optional: figures shouldn’t indent when images go full-width */
+.prose :where(figure):not(:where(.not-prose *)) {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+/* If you use <figure><img/></figure> in MDX, ensure the img is full width too */
+.prose :where(figure > img):not(:where(.not-prose *)) {
+  width: 100%;
+  height: auto;
+}

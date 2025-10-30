@@ -15,7 +15,7 @@ export default function ReportsLayout({ children }) {
         .slice(0, 5);
 
     return (
-        <div className="grid max-w-4xl grid-cols-1 gap-8 px-6 py-12 mx-auto md:grid-cols-4">
+        <div className="grid max-w-7xl grid-cols-1 gap-8 px-6 py-12 mx-auto md:grid-cols-4">
             {/* Main content */}
             <main className="prose prose-lg md:col-span-3 prose-indigo dark:prose-invert">
                 {children}
