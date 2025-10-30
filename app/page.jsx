@@ -2,6 +2,7 @@ import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import BlogCard from "@/components/BlogCard";
+import ReportCard from "./components/ReportCard";
 import ProjectCard from "@/components/ProjectCard";
 import LogoCard from "@/components/LogoCard";
 import { getBlogPosts, getProjects, getReports } from "@/utils/mdxUtils";
@@ -39,7 +40,7 @@ export default async function Home() {
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                     {reports.map((report) => (
-                        <BlogCard
+                        <ReportCard
                             key={report.slug}
                             title={report.title}
                             date={report.displayDate}
