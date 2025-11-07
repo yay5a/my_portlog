@@ -30,11 +30,11 @@ export default async function Page({ params }) {
                     <h1 className="mb-2 text-4xl font-bold">
                         {metadata.title}
                     </h1>
-                    <time className="text-gray-500">
+                    <time className="text-gray-300">
                         {new Date(metadata.date).toLocaleDateString()}
                     </time>
                     {metadata.description && (
-                        <p className="mt-2 text-gray-600">
+                        <p className="mt-2 text-gray-400">
                             {metadata.description}
                         </p>
                     )}

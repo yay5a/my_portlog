@@ -1,0 +1,155 @@
+---
+title: "SSH Setup and DHCP Reservation on Ubuntu Server"
+date: "2025-11-07"
+author: "Mohammed 'Asad' Bhimjee"
+tags: ["Ubuntu Server", "SSH", "Networking", "Home Lab", "DHCP Reservation", "Self-Hosting", "DevOps"]
+description: "Secure SSH setup and DHCP reservation on Ubuntu Server for stable self-hosted services."
+status: "completed"
+confidentiality: "sanitized copy – all private IPs, usernames, and identifiers masked"
+---
+
+*(Self-Hosting Family Photo Server – Part 1)*
+
+---
+
+### Objective
+Configure an Ubuntu Server for secure remote SSH access using key-based authentication and ensure a static internal IP address through DHCP reservation.  
+This serves as the foundation for a self-hosted family photo service (Immich + Caddy stack).
+
+---
+
+### Environment
+
+| Component | Details |
+|------------|----------|
+| **Server** | Ubuntu Server 24.04 LTS on repurposed laptop (Specs: AMD A8-3520M APU, 2x 8 GB RAM, 1 TB SSD)|
+| **Client** | Windows 11 workstation (WSL (Fedora 42) / OpenSSH) |
+| **Network** | Home mesh router (`192.168.x.x` range) |
+| **Access Method** | SSH with ED25519 key authentication |
+| **Goal** | Stable, key-only SSH access and static IP assignment |
+
+---
+
+### Step 1 – Install and Enable SSH
+
+```bash
+sudo apt update
+sudo apt install -y openssh-server ufw
+sudo systemctl enable --now ssh
+sudo ufw allow OpenSSH
+sudo ufw enable
+sudo systemctl status ssh
+```
+
+---
+
+### Verification
+
+```bash
+hostname -I     # shows current LAN IP
+```
+
+Result:  
+`sshd` is active and listening on all interfaces (`0.0.0.0:22`, `:::22`).
+
+---
+
+### Step 2 – Set Up Key-Based Authentication
+
+**On the client:**
+```bash
+ssh-keygen -t ed25519 -C "homelab-key"
+ssh-copy-id <user>@192.168.x.x
+```
+
+**On the server (`/etc/ssh/sshd_config`):**
+```bash
+PermitRootLogin no
+PubkeyAuthentication yes
+PasswordAuthentication no
+UsePAM yes
+```
+
+Apply and verify:
+```bash
+sudo systemctl reload ssh
+sudo sshd -t   # returns nothing if syntax is valid
+```
+
+**Example successful log entry (truncated):**
+```
+Accepted publickey for <user> from 192.168.x.x port #### ssh2: ED25519 SHA256:...
+pam_unix(sshd:session): session opened for user <user>
+```
+
+---
+
+### Step 3 – Reserve Static IP on Router
+
+1. Open the router or mesh network app.  
+2. Locate your device (e.g., "homelab-server").  
+3. Choose **IP Reservation / DHCP Lease / Static IP**.  
+4. Reserve the current IP (e.g., `192.168.x.x`).  
+5. Optionally reboot the router to confirm assignment.
+
+To view your MAC address (for manual reservation):
+```bash
+ip link show
+# or
+ip a | grep link/ether
+```
+
+---
+
+### Step 4 – Verification
+
+After reboot or reconnect:
+```bash
+hostname -I
+```
+Expected output: `192.168.x.x`
+
+Firewall status:
+```bash
+sudo ufw status
+```
+
+View SSH session logs:
+```bash
+sudo journalctl -fu ssh
+```
+
+---
+
+### Results Summary
+
+| Checkpoint | Status |
+|-------------|---------|
+| SSH Daemon Active | ✅ |
+| Key Authentication Functional | ✅ |
+| Password Login Disabled | ✅ |
+| Root Login Disabled | ✅ |
+| DHCP Lease Reserved | ✅ |
+| System Reachable from LAN | ✅ |
+
+---
+
+### Next Steps
+
+- Configure **Caddy** for reverse proxy and HTTPS.  
+- Deploy **Immich** Docker stack for self-hosted photo cloud.  
+- Implement automated USB photo volume backups.  
+
+---
+
+### Notes
+
+- Keeping `PasswordAuthentication no` mitigates brute-force attacks.  
+- Router IP reservation ensures consistency for SSH, Caddy, and Docker services.  
+- Verified SSH key authentication through system logs (`Accepted publickey`).  
+
+---
+
+*This sanitized runbook demonstrates secure configuration practices and network reliability for self-hosted systems in a home-lab context. Future parts will document Immich deployment, reverse-proxy setup, and WAN access hardening.*
+
+*Documentation drafted with AI assistance (ChatGPT). All procedures performed, tested, and validated manually on a live Ubuntu Server.*

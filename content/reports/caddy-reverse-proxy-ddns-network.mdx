@@ -1,0 +1,285 @@
+---
+title: "Caddy Reverse Proxy, IPv6‑only + deSEC (Self‑Hosting Family Photo Server — Part 2)"
+description: "Final working design: Immich behind Caddy with IPv6‑only public access via deSEC. What changed, why it works, verification, and a fallback plan for IPv4‑only users."
+date: 2025-11-07
+tags: [immich, caddy, docker, desec, ddns, ipv6, cgnat, eero]
+---
+
+This continues **Part 1** (SSH + DHCP reservation). Caddy reverse proxy integrated into Docker, configured DNS at deSEC (dedyn.io), debugged routing, and ended with a clean **IPv6‑only** public deployment.
+
+---
+
+## TL;DR
+
+* **Working:** Immich is publicly reachable at **`<FQDN>`** over **IPv6 (HTTPS)** via **Caddy**.
+* **Why:** ISP places the router behind **CGNAT** on IPv4, so inbound IPv4 is impossible. We removed the **A** record and published **AAAA‑only**.
+* **DNS:** deSEC hosts the zone. **NS** records remain at deSEC.
+* **TLS:** Caddy obtained and serves a valid Let’s Encrypt certificate over IPv6.
+* **Verified:** Access confirmed from a cellular network; redirects, cookies, and WebSockets behave correctly.
+* **Caveat:** IPv4‑only networks cannot reach the site. Fallback: **Cloudflare Tunnel** or obtain a **public IPv4** from the ISP.
+
+---
+
+## [Immich-app](https://github.com/immich-app/immich)
+![Image of Immich from its github repository](/immich-app.png)
+
+---
+
+## What changed vs. the initial plan
+
+1. **IPv6‑only public access.**
+   Deleted the **A** record; kept **AAAA** pointed at `<GLOBAL_IPV6>`.
+
+2. **Stopped pursuing IPv4 port‑forwarding.**
+   Router WAN shows `100.x.x.x` (CGNAT). Port‑forwarding cannot work through CGNAT.
+
+3. **Caddy is the HTTPS entrypoint.**
+   Terminates TLS and reverse‑proxies to Immich; auto‑renews certs over IPv6.
+
+4. **DDNS simplified.**
+   deSEC manages the name; updates target **IPv6** only. (Add IPv4 later if public address is acquired, or front with a tunnel.)
+
+---
+
+## Final architecture
+
+```
+Internet (IPv6)
+   │
+   ├─► deSEC (AAAA for <FQDN>)
+   │
+Router (IPv6 on; inbound 80/443 allowed)
+   │
+Ubuntu host
+   ├─ Caddy (TLS, reverse_proxy)
+   └─ Immich (Docker)
+```
+
+---
+
+## deSEC (DNS)
+
+* **Records**
+
+  * `AAAA  <FQDN>  <GLOBAL_IPV6>`
+  * `NS    <domain>  ns1.desec.io / ns2.desec.org` (unchanged)
+* **Deliberately absent:** `A` (IPv4) — removed to avoid broken dual‑stack behavior.
+
+> Placeholders are sanitized: `<FQDN>`, `<GLOBAL_IPV6>`.
+
+---
+
+## Docker & Caddy (sanitized)
+
+### Project layout
+
+```
+/opt/immich/
+├─ docker-compose.yml
+├─ Caddyfile
+├─ .env
+└─ ddns-updater/
+   └─ config.json
+```
+
+### `docker-compose.yml` (excerpt)
+
+```yaml
+services:
+  immich-server:
+    image: ghcr.io/immich-app/immich-server:${IMMICH_VERSION:-release}
+    env_file: [.env]
+    volumes:
+      - ${UPLOAD_LOCATION}:/data
+      - /etc/localtime:/etc/localtime:ro
+    depends_on: [redis, database]
+    restart: always
+
+  caddy:
+    image: caddy:latest
+    container_name: caddy
+    depends_on: [immich-server]
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    restart: unless-stopped
+
+  ddns-updater:
+    image: qmcgaw/ddns-updater
+    container_name: ddns-updater
+    volumes:
+      - ./ddns-updater:/updater/data
+    environment:
+      - PERIOD=5m
+    restart: unless-stopped
+
+volumes:
+  caddy_data:
+  caddy_config:
+```
+
+### `Caddyfile` (sanitized)
+
+```caddy
+{
+  email <ACME_EMAIL>
+}
+
+<FQDN> {
+  encode zstd gzip
+
+  header {
+    Strict-Transport-Security "max-age=31536000; includeSubDomains"
+    X-Content-Type-Options "nosniff"
+    X-Frame-Options "DENY"
+    Referrer-Policy "strict-origin-when-cross-origin"
+  }
+
+  # Immich upstream (adjust if different)
+  reverse_proxy http://immich-server:2283
+}
+```
+
+### DDNS (`ddns-updater` config; sanitized)
+
+```json
+{
+  "settings": [
+    {
+      "provider": "desec",
+      "domain": "<FQDN>",
+      "token": "<DESEC_TOKEN>",
+      "ip_version": "ipv6"
+    }
+  ]
+}
+```
+
+> Add an IPv4 block later only if you obtain a true public IPv4 or terminate a tunnel on a public endpoint.
+
+---
+
+## Router & host firewall
+
+* **Router:** IPv6 **On**; inbound **80/443 TCP** allowed to the server. WAN IPv4 is `100.x.x.x/xx` (CGNAT).
+* **Server firewall (UFW):**
+
+  ```bash
+  sudo ufw allow 80/tcp
+  sudo ufw allow 443/tcp
+  ```
+
+---
+
+## Verification (commands)
+
+Run from **outside** the home network (e.g., mobile data).
+
+```bash
+# DNS: AAAA only
+dig +short A    <FQDN>          # (empty)
+dig +short AAAA <FQDN>          # <GLOBAL_IPV6>
+
+# HTTP → HTTPS redirect
+curl -6I http://<FQDN>          # 301/308 with Location: https://<FQDN>/
+
+# TLS & HTTP/2
+curl -6I https://<FQDN>         # 200 with normal headers
+
+# Optional: HTTP/3
+curl -6I --http3 https://<FQDN>
+
+# Certificate details
+echo | openssl s_client -connect <FQDN>:443 -servername <FQDN> 2>/dev/null \
+| openssl x509 -noout -subject -issuer -dates -ext subjectAltName
+```
+
+**Browser checks**
+
+* No mixed‑content errors in Console.
+* Cookies set by Immich are **Secure** (and HttpOnly where applicable).
+* WebSockets: live updates appear on a second client after an upload (`101 Switching Protocols` visible in DevTools → Network).
+
+**Large uploads**
+
+* Upload a 200–500 MB video from mobile data; completes without `413` or proxy timeouts.
+
+---
+
+## Why IPv6‑only is the right fit
+
+* Router’s WAN IPv4 is CGNAT (`100.64.0.0/10`) → inbound IPv4 cannot reach the LAN.
+* ISP provides **global IPv6**; inbound 80/443 over IPv6 works.
+* Removing the A record prevents clients from attempting an unreachable IPv4 path first.
+
+**Limitation:** users on **IPv4‑only** networks cannot connect.
+
+---
+
+## Fallback plan for IPv4‑only users
+
+* **Cloudflare Tunnel** in front of Caddy (keeps this architecture; adds IPv4 reachability).
+* **Tailscale Funnel** (private mesh sharing).
+* **Public IPv4** from the ISP, then restore the **A** record and standard forwarding.
+
+---
+
+## Sanitized runbook
+
+**Daily**
+
+```bash
+# Caddy renewals / errors
+journalctl -u caddy --since "yesterday"
+
+# Quick reachability
+curl -6I https://<FQDN>
+```
+
+**DNS toggle**
+
+* Keep **AAAA** updated.
+* Add **A** only if a public IPv4 becomes available (or a tunnel is added).
+
+**Backups**
+
+* Snapshot `Caddyfile`, `docker-compose.yml`, `.env`, and Immich storage volumes.
+
+---
+
+## Appendix A — minimal `.env` (sanitized)
+
+```bash
+IMMICH_VERSION=v2
+
+# Immich examples
+DB_USERNAME=immich
+DB_PASSWORD=<REDACTED>
+DB_DATABASE_NAME=immich
+UPLOAD_LOCATION=/srv/immich/library
+```
+
+## Appendix B — deSEC one‑off update (sanitized)
+
+```bash
+# Seed/update AAAA manually; routine updates handled by ddns-updater
+curl "https://update.dedyn.io/?hostname=<FQDN>&myipv6=$(curl -s -6 ifconfig.co)" \
+  -u "<FQDN>:<DESEC_TOKEN>"
+```
+
+---
+
+**Final state**
+
+* ✅ Public over IPv6 at `https://<FQDN>`
+* ✅ Valid TLS (Let’s Encrypt via Caddy)
+* ✅ Immich reachable and functional (web, uploads, live updates)
+* 🚫 No public IPv4 by design (CGNAT) — add a tunnel or public IPv4 later as needed
+
+> All sensitive details are sanitized: `<FQDN>`, `<GLOBAL_IPV6>`, `<ACME_EMAIL>`, `<DESEC_TOKEN>`, `<REDACTED>`.
+
+> *Documentation drafted with AI assistance (ChatGPT). All procedures performed, tested, and validated manually on a live Ubuntu Server.*
