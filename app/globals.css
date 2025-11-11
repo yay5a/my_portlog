@@ -57,6 +57,20 @@ body {
   text-rendering: optimizeLegibility;
 }
 
+ul {
+  list-style-position: inside;
+  margin: 0;
+  padding: 0;
+}
+ul > li p {
+  display: inline;
+}
+
+ul ul {
+  margin-left: 1.5rem; /* or 2rem for more space */
+  list-style-type: circle; /* optional: gives smaller bullets for nested lists */
+}
+
 /* Subtle, consistent link style (no neon underline soup) */
 a {
   color: hsl(var(--accent));
