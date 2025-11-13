@@ -85,48 +85,39 @@ export default async function Home() {
             <hr />
 
             {/* Features Section */}
-            <section className="py-12">
-                <div className="text-center mb-12 p-2">
+            <section className="relative z-10 mx-auto max-w-5xl px-4 py-16">
+                {/* Heading */}
+                <div className="mb-12 p-2 text-center">
                     <h2 className="text-3xl font-semibold">
                         Why Connect With Me?
                     </h2>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    <div className="p-8 rounded-2xl flex flex-col items-center space-y-4 shadow">
-                        <a
-                            href="/contact"
-                            className="rounded-full bg-gray-900 p-4"
-                        >
-                            <Image
-                                src="/self.jpg"
-                                alt="Logo"
-                                width={40}
-                                height={40}
-                            />
-                        </a>
-                        <p className="text-center">
+
+                {/* 3 reasons */}
+                <div className="grid gap-8 md:grid-cols-3">
+                    <div className="card flex flex-col items-center gap-3 p-6 text-center">
+                        <Image
+                            src="/self.jpg"
+                            alt="Portrait of Yaysa"
+                            width={64}
+                            height={64}
+                            className="rounded-full"
+                        />
+                        <p className="text-sm text-slate-200">
                             Open to collaboration and new ideas.
                         </p>
                     </div>
-                    <div className="p-8 rounded-2xl flex flex-col items-center space-y-4 shadow">
-                        <a
-                            href="https://github.com/yay5a"
-                            className="rounded-full bg-gray-900 p-4"
-                        >
-                            <span className="text-2xl">💡</span>
-                        </a>
-                        <p className="text-center">
+
+                    <div className="card flex flex-col items-center gap-3 p-6 text-center">
+                        <span className="text-2xl">💡</span>
+                        <p className="text-sm text-slate-200">
                             Sharing knowledge and learning together.
                         </p>
                     </div>
-                    <div className="p-8 rounded-2xl flex flex-col items-center space-y-4 shadow">
-                        <a
-                            href="/contact"
-                            className="rounded-full bg-gray-900 p-4"
-                        >
-                            <span className="text-2xl">🌐</span>
-                        </a>
-                        <p className="text-center">
+
+                    <div className="card flex flex-col items-center gap-3 p-6 text-center">
+                        <span className="text-2xl">🌐</span>
+                        <p className="text-sm text-slate-200">
                             Connect on multiple platforms.
                         </p>
                     </div>
