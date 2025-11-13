@@ -1,0 +1,139 @@
+---
+title: "Self-Hosting Private Server – Part 1: A New Server"
+date: "2025-11-07"
+author: "Mohammed 'Asad' Bhimjee"
+tags: ["Ubuntu Server", "SSH", "Networking", "Home Lab", "DHCP Reservation", "Self-Hosting", "DevOps"]
+description: "Secure SSH setup and DHCP reservation on Ubuntu Server for stable self-hosted services."
+status: "completed"
+confidentiality: "sanitized copy – all private IPs, usernames, and identifiers masked"
+---
+
+*(Self‑Hosting Private Server — Part 1: A New Server)*
+
+---
+
+### Why this matters to me
+
+Turning an aging laptop into a private server felt both empowering and slightly terrifying.  I’m not a network professional, so I leaned on ChatGPT for a lot of the commands and configuration guidance.  At every step I double‑checked the advice and made notes about what I did and didn’t understand.  This write‑up captures that learning process, complete with a bit of uncertainty and plenty of small victories.
+
+### What I'm trying to accomplish
+Configure an Ubuntu Server for secure remote SSH access using key‑based authentication and make sure it keeps the same address on my home network via DHCP reservation.  
+This serves as the foundation for a self‑hosted family photo service (Immich + Caddy stack).  I'm learning as I go, so I rely on AI suggestions for commands, but I test and verify everything myself.
+
+---
+
+### Environment
+
+| Component | Details |
+|------------|----------|
+| **Server** | Ubuntu Server 24.04 LTS on repurposed laptop (Specs: AMD A8-3520M APU, 2x 8 GB RAM, 1 TB SSD)|
+| **Client** | Windows 11 workstation (WSL (Fedora 42) / OpenSSH) |
+| **Network** | Home mesh router (`192.168.x.x` range) |
+| **Access Method** | SSH with ED25519 key authentication |
+| **Goal** | Stable, key-only SSH access and static IP assignment |
+
+---
+
+### Step 1 – Install and Enable SSH
+
+    sudo apt update
+    sudo apt install -y openssh-server ufw
+    sudo systemctl enable --now ssh
+    sudo ufw allow OpenSSH
+    sudo ufw enable
+    sudo systemctl status ssh
+
+---
+
+### Verification
+
+    hostname -I     # shows current LAN IP
+
+Result:  
+`sshd` is active and listening on all interfaces (`0.0.0.0:22`, `:::22`).
+
+---
+
+### Step 2 – Set Up Key-Based Authentication
+
+**On the client:**
+    ssh-keygen -t ed25519 -C "homelab-key"
+    ssh-copy-id <user>@192.168.x.x
+
+**On the server (`/etc/ssh/sshd_config`):**
+    PermitRootLogin no
+    PubkeyAuthentication yes
+    PasswordAuthentication no
+    UsePAM yes
+
+Apply and verify:
+    sudo systemctl reload ssh
+    sudo sshd -t   # returns nothing if syntax is valid
+
+**Example successful log entry (truncated):**
+    Accepted publickey for <user> from 192.168.x.x port #### ssh2: ED25519 SHA256:...
+    pam_unix(sshd:session): session opened for user <user>
+
+---
+
+### Step 3 – Reserve Static IP on Router
+
+1. Open the router or mesh network app.  
+2. Locate your device (e.g., "homelab-server").  
+3. Choose **IP Reservation / DHCP Lease / Static IP**.  
+4. Reserve the current IP (e.g., `192.168.x.x`).  
+5. Optionally reboot the router to confirm assignment.
+
+To view your MAC address (for manual reservation):
+    ip link show
+    # or
+    ip a | grep link/ether
+
+---
+
+### Step 4 – Verification
+
+After reboot or reconnect:
+    hostname -I
+Expected output: `192.168.x.x`
+
+Firewall status:
+    sudo ufw status
+
+View SSH session logs:
+    sudo journalctl -fu ssh
+
+---
+
+### Results Summary
+
+| Checkpoint | Status |
+|-------------|---------|
+| SSH Daemon Active | ✅ |
+| Key Authentication Functional | ✅ |
+| Password Login Disabled | ✅ |
+| Root Login Disabled | ✅ |
+| DHCP Lease Reserved | ✅ |
+| System Reachable from LAN | ✅ |
+
+---
+
+### Next Steps
+
+- Configure **Caddy** for reverse proxy and HTTPS.  
+- Deploy **Immich** Docker stack for self-hosted photo cloud.  
+- Implement automated USB photo volume backups.  
+
+---
+
+### Notes
+
+- Keeping `PasswordAuthentication no` mitigates brute-force attacks.  
+- Router IP reservation ensures consistency for SSH, Caddy, and Docker services.  
+- Verified SSH key authentication through system logs (`Accepted publickey`).  
+
+---
+
+*This sanitized runbook demonstrates secure configuration practices and network reliability for self-hosted systems in a home-lab context. Future parts will document Immich deployment, reverse-proxy setup, and WAN access hardening.*
+
+*This report was templated with the help of ChatGPT, and I validated each step myself.  I followed the AI's recommendations when they made sense and adjusted when my testing suggested a better approach.*

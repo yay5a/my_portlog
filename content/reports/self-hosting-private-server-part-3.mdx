@@ -1,0 +1,222 @@
+---
+title: "Self-Hosting Private Server – Part 3: The Return of the Server"
+description: "A real-world account of how an Immich deployment became intermittently unreachable from the outside, why the router's UI misled diagnostics, and how a full IPv6 subsystem reset exposed the true cause."
+date: 2025-11-13
+tags: [immich, caddy, docker, desec, ipv6, firewall, diagnostics, eero]
+---
+
+import Link from "next/link"
+
+This chapter continues **Part 1** (<Link href="/reports/SSH_Setup_and_DHCP_Reservation_on_Ubuntu_Server">SSH + DHCP Reservation</Link>)  
+and **Part 2** (<Link href="/reports/Caddy_Reverse_Proxy,_IPv6-only_+_deSEC_(Self-Hosting_Family_Photo_Server_—_Part_2)">Caddy Reverse Proxy + IPv6-only Deployment</Link>).
+
+This section documents a real, week-long intermittent issue where the server was fully functional, DNS was correct, the proxy was healthy, and the IPv6 address stayed valid — but external access would randomly vanish.  
+Internal access never broke once.  
+The outside world simply stopped getting through.
+
+At first, the system worked perfectly.  
+It even came back once after adjusting Docker-related components.  
+But eventually the pattern became impossible to ignore:  
+something in the network path was intermittently blocking IPv6 traffic even though every diagnostic on the server side passed.
+
+This is the story of how that happened, and what actually fixed it.
+
+All sensitive information is redacted.
+
+### Why this chapter was a slog
+
+When the server first went live on IPv6 it felt like a triumph.  Everything worked, and I was ready to write a victory post.  Then, without warning, the external connection dropped while the LAN remained fine.  I assumed I had broken something in Docker or Caddy, so I spent hours tweaking configs and running commands from ChatGPT’s suggestions — rebuild the stack, restart the server, check DNS, adjust UFW.  Every test on the server side passed, and yet the site remained unreachable from my phone.  
+
+During this week‑long debugging saga I realised two important things:  
+
+* **I don't understand everything.**  IPv6, DHCPv6, and router firewall tables were all new to me.  ChatGPT provided useful explanations and commands, but I still had to translate them to my environment and test each one.  
+* **AI guidance isn’t magic.**  Sometimes the instructions were wrong or incomplete because the actual problem wasn’t on the server at all.  The router UI was showing firewall rules that didn’t exist, and neither ChatGPT nor I could see that until I started scanning from the outside and questioning the UI itself.  
+
+This chapter captures that learning process — following AI advice, questioning it, and eventually discovering that my Eero router was quietly blocking traffic while claiming it wasn't.
+
+---
+
+## Initial Success, Followed by Intermittent Failure
+
+After deploying Immich behind Caddy with IPv6-only public access:
+
+• External clients reached the service normally  
+• DNS (AAAA records) resolved correctly  
+• The server held a stable global IPv6 address  
+• Everything behaved exactly as designed
+
+Then, sometime *after* this stable period, external access abruptly stopped.  
+Internal access remained flawless.  
+Nothing changed on the server, yet something broke anyway.
+
+Later, after removing an unused DDNS-updater container and validating Docker’s networking, external access started working again for a while — which made the situation even stranger.
+
+But eventually, connectivity dropped *again*.  
+At this point, the problem was clearly intermittent and not tied to actions on the server.
+
+This pushed the investigation toward components upstream of Immich, Docker, Caddy, and Ubuntu.
+
+---
+
+## Symptoms During Each Outage
+
+Across every outage window, the symptoms were identical:
+
+• Internal access to Immich always worked  
+• AAAA DNS records were correct  
+• The server’s IPv6 global address remained valid  
+• External IPv6 ping succeeded  
+• External HTTP/HTTPS hung indefinitely  
+• External Nmap scans showed **filtered** on TCP 80 and 443  
+• Internal Nmap scans showed **open** on TCP 80 and 443
+
+This combination always points to one cause:
+
+**Packets were reaching the router, but the router was not letting them through.**  
+The server wasn’t breaking.  
+The proxy wasn’t breaking.  
+The DNS wasn’t breaking.
+
+The firewall on the gateway was silently dropping inbound IPv6 TCP traffic.
+
+---
+
+## Host-Level Firewalls (Ruled Out)
+
+The server's UFW firewall was active but fully permissive throughout the entire deployment period.  
+Rules for TCP 22, 80, and 443 were explicitly allowed for both IPv4 and IPv6, and internal scans consistently reported these ports as open.  
+No UFW logs indicated packet drops, and internal traffic flowed without interruption.  
+I also double‑checked that no antivirus or endpoint security software was running on the server; the antivirus you see in earlier screenshots runs on my Windows laptop, not on Ubuntu.  
+This confirmed that neither the host firewall nor any local security software was responsible for the intermittent external failures.
+
+---
+
+## The Diagnostic Turning Point: External Port Scanning
+
+To confirm that the server was not receiving packets, an external IPv6 scan was performed from a mobile network.
+
+External scan:
+
+    80/tcp   filtered
+    443/tcp  filtered
+
+Internal scan:
+
+    80/tcp   open
+    443/tcp  open
+
+These two results cannot coexist unless the firewall between the internet and the LAN is the entity dropping traffic.
+
+This is how it became undeniable that the router, not the server, was the source of the problem.
+
+---
+
+## Router UI Behavior That Complicated Troubleshooting
+
+While examining the router’s IPv6 firewall interface, several inconsistencies appeared:
+
+• The IPv6 firewall page sometimes displayed the server’s IPv4 address  
+• Navigating into a rule and back caused the UI to switch between IPv4 and IPv6 views  
+• IPv4 port forwards appeared inside IPv6 configuration sections  
+• Previously created IPv6 firewall rules were visible, but no longer applied  
+• The router's backend was dropping packets while the UI claimed the rules existed  
+
+This contradictory behavior made diagnostics significantly harder.  
+The UI presented a configuration that did not match the router’s actual firewall state, which sent troubleshooting in the wrong direction until external scans exposed the truth.
+
+In practical terms:  
+**the router UI became misleading during a real outage**, and the firewall had silently desynchronized.
+
+---
+
+## Root Cause: IPv6 Firewall State Corruption (“Ghost Rules”)
+
+The router had lost its actual IPv6 inbound rules while still displaying them in the interface.  
+These “ghost rules” remained visible but were not present in the active firewall table.
+
+This explains:
+
+• Why ICMPv6 still worked  
+• Why DNS still worked  
+• Why internal access worked  
+• Why external access failed intermittently  
+• Why scanners saw the ports as “filtered”  
+• Why Caddy logs stayed clean  
+• Why redeploying containers changed nothing  
+
+Nothing on the server was malfunctioning.  
+The firewall simply wasn’t enforcing the rules the UI claimed were present.
+
+Only packet-level testing exposed the real behavior.
+
+---
+
+## Fix: Reset IPv6 on the Router + Recreate Rules
+
+A full reset of the router’s IPv6 subsystem corrected the issue:
+
+### 1. Disable IPv6
+The router rebooted automatically.  
+This cleared:
+
+• Prefix delegation  
+• Router advertisements  
+• Firewall tables  
+• Invalid or stale rules
+
+### 2. Re-enable IPv6
+The router rebooted again.  
+A fresh IPv6 prefix was issued.  
+LAN devices received clean, valid addresses.
+
+### 3. Recreate inbound IPv6 rules
+The required rules were added again:
+
+• Allow TCP 80 → server  
+• Allow TCP 443 → server  
+
+### 4. Validate with external scanning
+
+After the reset:
+
+    80/tcp   open
+    443/tcp  open
+
+External access returned immediately.
+
+---
+
+## Why Monitoring Matters
+
+Because connectivity failed intermittently over days, and because the router maintained a misleading UI, the real test is time.
+
+The system must be observed for at least a full day to verify:
+
+• Firewall rules remain applied  
+• Prefix renewals do not break connectivity  
+• External IPv6 access persists  
+• External scans continue reporting “open”  
+• Immich remains reachable without manual intervention  
+
+If access stays consistent throughout the day, the fix can be considered durable.  
+If it fails again, the issue likely lies deeper in the router firmware’s IPv6 rule persistence.
+
+---
+
+## Conclusion
+
+The server, proxy, DNS provider, containers, and OS were functioning correctly throughout the outages.  
+All failures originated in the router’s IPv6 firewall subsystem, which silently desynchronized while presenting stale rules in the UI.
+
+The only reliable indicators were:
+
+• External IPv6 port scans  
+• Internal-to-external port comparison  
+• Consistent server health  
+
+Resetting IPv6 on the router and recreating the inbound rules restored proper behavior.
+
+This completes **Part 3** of the deployment series.
+
+*As with the earlier chapters, ChatGPT helped me structure and research this write‑up, but the actual diagnosis was the result of my own troubleshooting.  I ran the commands, inspected the outputs, and tried to make sense of the results.  The AI’s guidance is invaluable, but I learned not to stop questioning when the evidence doesn’t add up.*
+
