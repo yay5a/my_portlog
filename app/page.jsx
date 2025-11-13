@@ -9,8 +9,8 @@ import { getBlogPosts, getProjects, getReports } from "@/utils/mdxUtils";
 
 export default async function Home() {
     const posts = await getBlogPosts({ limit: 3 });
-    const projects = await getProjects({ limit: 2 });
-    const reports = await getReports({ limit: 2 });
+    const projects = await getProjects({ limit: 3 });
+    const reports = await getReports({ limit: 3 });
 
     return (
         <>
@@ -52,19 +52,6 @@ export default async function Home() {
             </section>
             <hr />
 
-            {/* Projects Section */}
-            <section className="py-12 container mx-auto">
-                <h2 className="mb-6 text-2xl font-bold text-center">
-                    Latest Projects
-                </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    {projects.map((project) => (
-                        <ProjectCard key={project.slug} {...project} />
-                    ))}
-                </div>
-            </section>
-            <hr />
-
             {/* Blog Posts Section */}
             <section className="py-12 container mx-auto">
                 <h2 className="mb-6 text-2xl font-bold text-center">
@@ -82,6 +69,20 @@ export default async function Home() {
                     ))}
                 </div>
             </section>
+            <hr />
+
+            {/* Projects Section */}
+            <section className="py-12 container mx-auto">
+                <h2 className="mb-6 text-2xl font-bold text-center">
+                    Latest Projects
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    {projects.map((project) => (
+                        <ProjectCard key={project.slug} {...project} />
+                    ))}
+                </div>
+            </section>
+            <hr />
 
             {/* Features Section */}
             <section className="py-12">
