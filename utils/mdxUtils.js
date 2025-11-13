@@ -52,9 +52,13 @@ export async function getMdxContent({
         };
 
         if (includeExcerpt) {
-            baseData.excerpt = makeMarkdownExcerpt(content, {
-                maxWords: excerptLength,
-            });
+            baseData.excerpt =
+                frontmatter.description &&
+                frontmatter.description.trim().length > 0
+                    ? frontmatter.description
+                    : makeMarkdownExcerpt(content, {
+                          maxWords: excerptLength,
+                      });
         }
 
         if (useMtime) {
