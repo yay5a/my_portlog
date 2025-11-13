@@ -5,7 +5,7 @@ date: 2025-11-07
 tags: [immich, caddy, docker, desec, ddns, ipv6, cgnat, eero]
 ---
 
-This part picks up where Part 1 left off.  With SSH and a static IP in place, I set out to make my family’s photo server reachable over the internet.  ChatGPT gave me a high‑level plan: run Immich behind Caddy, use deSEC for DNS, and lean on IPv6 because my ISP hides me behind carrier‑grade NAT.  On paper that’s straightforward; in practice I spent hours puzzled by “global” IPv4 addresses that weren’t actually reachable.  This chapter records what worked, what didn’t, and how I learned to think in IPv6 while debugging through router quirks.
+This part picks up where Part 1 left off.  With SSH and a static IP in place, I set out to make my family’s photo server reachable over the internet.  ChatGPT gave me a high‑level plan: run Immich behind Caddy, use ~~DuckDNS~~ deSEC for DNS (opted for deSEC due to lack of security features and reliability), and lean on IPv6 because my ISP hides me behind carrier‑grade NAT.  On paper that’s straightforward; in practice I spent hours puzzled by “global” IPv4 addresses that weren’t actually reachable.  This chapter records what worked, what didn’t, and how I learned to think in IPv6 while debugging through router quirks.
 
 ### Why this chapter was a slog
 
@@ -80,6 +80,7 @@ a free DNS hosting service, designed with security in mind. Running on open-sour
 
 ## Final architecture
 
+```
     Internet (IPv6)
         │
     ├─► deSEC (AAAA for <FQDN>)
@@ -89,6 +90,7 @@ a free DNS hosting service, designed with security in mind. Running on open-sour
         Ubuntu host
         ├─ Caddy (TLS, reverse_proxy)
     └─ Immich (Docker)
+```
 
     ---
 
@@ -105,15 +107,19 @@ a free DNS hosting service, designed with security in mind. Running on open-sour
 
 ### Project layout
     > ddns-updater has been removed from the stack, but kept for information purposes (see DDNS Misadventure).
+
+```
     /opt/immich/
     ├─ docker-compose.yml
     ├─ Caddyfile
     ├─ .env
     └─ddns-updater/
     └─ config.json
+```
 
 ### `docker-compose.yml` (excerpt)
 
+```yml
     
     services:
         immich-server:
@@ -161,10 +167,11 @@ a free DNS hosting service, designed with security in mind. Running on open-sour
             enable_ipv6: true
             ipam:
                 driver: default
-
+```
 
 ### `Caddyfile` (sanitized)
 
+```
     {
         email <ACME_EMAIL>
     }
@@ -182,10 +189,13 @@ a free DNS hosting service, designed with security in mind. Running on open-sour
         # Immich upstream (adjust if different)
         reverse_proxy http://immich-server:2283
     }
+```
 
 ### ~~DDNS (`ddns-updater` config; sanitized)~~
 
 > ddns-updater was removed from the container (see DDNS Misadventure)
+
+```json
     {
         "settings": [
         {
@@ -196,6 +206,7 @@ a free DNS hosting service, designed with security in mind. Running on open-sour
         }
         ]
     }
+```
 
 > ~~Add an IPv4 block later only if you obtain a true public IPv4 or terminate a tunnel on a public endpoint.~~
 
@@ -208,8 +219,11 @@ a free DNS hosting service, designed with security in mind. Running on open-sour
 IPv6 inbound **80/443 TCP** allowed to the server.
 
 **Server firewall (UFW):**
+   
+```bash
     sudo ufw allow 80/tcp
     sudo ufw allow 443/tcp
+```
        > No inbound ports besides 80/443 are open. SSH access is restricted to my LAN and rate-limited via UFW.
 
        ---
@@ -219,22 +233,31 @@ IPv6 inbound **80/443 TCP** allowed to the server.
        Run from **outside** the home network (e.g., mobile data).
 
         # DNS: AAAA only
+```bash
         dig +short A    <FQDN>          # (empty)
         dig +short AAAA <FQDN>          # <GLOBAL_IPV6>
+```
 
         # HTTP → HTTPS redirect
+```bash
         curl -6I http://<FQDN>          # 301/308 with Location: https://<FQDN>/
+```
 
         # TLS & HTTP/2
+```bash
         curl -6I https://<FQDN>         # 200 with normal headers
+```
 
         # Optional: HTTP/3
+```bash
         curl -6I --http3 https://<FQDN>
+```
 
         # Certificate details
+```bash
         echo | openssl s_client -connect <FQDN>:443 -servername <FQDN> 2>/dev/null \
             | openssl x509 -noout -subject -issuer -dates -ext subjectAltName
-        
+``` 
 
 
 **Browser checks**
@@ -319,6 +342,7 @@ IPv6 inbound **80/443 TCP** allowed to the server.
 
 ## Appendix A — minimal `.env` (sanitized)
 
+```
         IMMICH_VERSION=v2
 
         # Immich examples
@@ -326,14 +350,16 @@ IPv6 inbound **80/443 TCP** allowed to the server.
         DB_PASSWORD=<REDACTED>
         DB_DATABASE_NAME=immich
         UPLOAD_LOCATION=/srv/immich/library
+```
 
 ## Appendix B — deSEC one‑off update (sanitized)
         > I removed the routine updater from running automatically, if the server can no longer be reached due to IP misconfiguration, running this script *should* resolve it.
 
         # Seed/update AAAA manually; routine updates handled by ddns-updater
+```bash
         curl "https://update.dedyn.io/?hostname=<FQDN>&myipv6=$(curl -s -6 ifconfig.co)" \
             -u "<FQDN>:<DESEC_TOKEN>"
-
+```
             ---
 
             **Final state**
@@ -345,4 +371,4 @@ IPv6 inbound **80/443 TCP** allowed to the server.
 
     > All sensitive details are sanitized: `<FQDN>`, `<GLOBAL_IPV6>`, `<ACME_EMAIL>`, `<DESEC_TOKEN>`, `<REDACTED>`.
 
-    > *This report was templated with AI assistance (ChatGPT) and manually verified by me. All procedures were performed, tested and validated on a live Ubuntu Server.*
+    > *This report was templated with help from ChatGPT. I validated the simple parts easily; the trickier parts required testing, debugging, and a fair amount of trial-and-error on my side.*

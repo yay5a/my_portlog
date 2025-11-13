@@ -97,13 +97,17 @@ To confirm that the server was not receiving packets, an external IPv6 scan was 
 
 External scan:
 
+```
     80/tcp   filtered
     443/tcp  filtered
+```
 
 Internal scan:
 
+```
     80/tcp   open
     443/tcp  open
+```
 
 These two results cannot coexist unless the firewall between the internet and the LAN is the entity dropping traffic.
 
@@ -179,8 +183,10 @@ The required rules were added again:
 
 After the reset:
 
+```
     80/tcp   open
     443/tcp  open
+```
 
 External access returned immediately.
 
@@ -218,5 +224,5 @@ Resetting IPv6 on the router and recreating the inbound rules restored proper be
 
 This completes **Part 3** of the deployment series.
 
-*As with the earlier chapters, ChatGPT helped me structure and research this write‑up, but the actual diagnosis was the result of my own troubleshooting.  I ran the commands, inspected the outputs, and tried to make sense of the results.  The AI’s guidance is invaluable, but I learned not to stop questioning when the evidence doesn’t add up.*
+*As with the earlier chapters, ChatGPT helped me structure and research this write‑up, but the actual diagnosis was the result of my own troubleshooting.  I ran the commands, inspected the outputs, and tried to make sense of the results.  The AI’s guidance is invaluable, but I learned not to stop questioning when the evidence doesn’t add up, even if the questions seem too obvious.*
 
