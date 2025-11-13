@@ -37,23 +37,30 @@ This serves as the foundation for a self‑hosted family photo service (Immich +
 ### Step 1 – Verify and Enable SSH
 
 ```bash
-    sudo apt update
-    sudo apt install -y openssh-server ufw
-    sudo systemctl enable --now ssh
-    sudo ufw allow OpenSSH
-    sudo ufw enable
-    sudo systemctl status ssh
+
+sudo apt update
+sudo apt install -y openssh-server ufw
+sudo systemctl enable --now ssh
+sudo ufw allow OpenSSH
+sudo ufw enable
+sudo systemctl status ssh
+
 ```
 
 ---
 
 ### Verification
 
+
 ```bash
-    hostname -I     # shows current LAN IP
+
+hostname -I     # shows current LAN IP
+
 ```
 
-Result:  
+
+Result:
+
 `sshd` is active and listening on all interfaces (`0.0.0.0:22`, `:::22`).
 
 ---
@@ -63,31 +70,39 @@ Result:
 **On the client:**
 
 ```bash
-    ssh-keygen -t ed25519 -C "homelab-key"
-    ssh-copy-id <user>@192.168.x.x
+
+ssh-keygen -t ed25519 -C "homelab-key"
+ssh-copy-id <user>@192.168.x.x
+
 ```
 
 **On the server (`/etc/ssh/sshd_config`):**
 
 ```
-    PermitRootLogin no
-    PubkeyAuthentication yes
-    PasswordAuthentication no
-    UsePAM yes
+
+PermitRootLogin no
+PubkeyAuthentication yes
+PasswordAuthentication no
+UsePAM yes
+
 ```
 
 Apply and verify:
 
 ```bash
-    sudo systemctl reload ssh
-    sudo sshd -t   # returns nothing if syntax is valid
+
+sudo systemctl reload ssh
+sudo sshd -t   # returns nothing if syntax is valid
+
 ```
 
 **Example successful log entry (truncated):**
 
 ```
-    Accepted publickey for <user> from 192.168.x.x port #### ssh2: ED25519 SHA256:...
-    pam_unix(sshd:session): session opened for user <user>
+
+Accepted publickey for <user> from 192.168.x.x port #### ssh2: ED25519 SHA256:...
+pam_unix(sshd:session): session opened for user <user>
+
 ```
 
 ---
@@ -102,10 +117,12 @@ Apply and verify:
 
 To view your MAC address (for manual reservation):
    
-```
-    ip link show
-    # or
-    ip a | grep link/ether
+```bash
+
+ip link show
+# or
+ip a | grep link/ether
+
 ```
 
 ---
@@ -115,7 +132,9 @@ To view your MAC address (for manual reservation):
 After reboot or reconnect:
    
 ```bash
-    hostname -I
+
+hostname -I
+
 ```
 
 Expected output: `192.168.x.x`
@@ -123,13 +142,17 @@ Expected output: `192.168.x.x`
 Firewall status:
 
 ```bash
-    sudo ufw status
+
+sudo ufw status
+
 ```
 
 View SSH session logs:
 
 ```bash
-    sudo journalctl -fu ssh
+
+sudo journalctl -fu ssh
+
 ```
 
 ---

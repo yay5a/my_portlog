@@ -81,15 +81,17 @@ a free DNS hosting service, designed with security in mind. Running on open-sour
 ## Final architecture
 
 ```
-    Internet (IPv6)
-        │
-    ├─► deSEC (AAAA for <FQDN>)
-        │
-        Router (IPv6 on; inbound 80/443 allowed)
-        │
-        Ubuntu host
-        ├─ Caddy (TLS, reverse_proxy)
-    └─ Immich (Docker)
+
+Internet (IPv6)
+    │
+├─► deSEC (AAAA for <FQDN>)
+    │
+    Router (IPv6 on; inbound 80/443 allowed)
+    │
+    Ubuntu host
+    ├─ Caddy (TLS, reverse_proxy)
+└─ Immich (Docker)
+
 ```
 
     ---
@@ -109,41 +111,43 @@ a free DNS hosting service, designed with security in mind. Running on open-sour
     > ddns-updater has been removed from the stack, but kept for information purposes (see DDNS Misadventure).
 
 ```
-    /opt/immich/
-    ├─ docker-compose.yml
-    ├─ Caddyfile
-    ├─ .env
-    └─ddns-updater/
-    └─ config.json
+
+/opt/immich/
+├─ docker-compose.yml
+├─ Caddyfile
+├─ .env
+└─ddns-updater/
+└─ config.json
+
 ```
 
 ### `docker-compose.yml` (excerpt)
 
 ```yml
     
-    services:
-        immich-server:
-            image: ghcr.io/immich-app/immich-server:${IMMICH_VERSION:-release}
-            env_file: [.env]
-            volumes:
-                - ${UPLOAD_LOCATION}:/data
-                - /etc/localtime:/etc/localtime:ro
-            depends_on: [redis, database]
-            restart: always
+services:
+    immich-server:
+        image: ghcr.io/immich-app/immich-server:${IMMICH_VERSION:-release}
+        env_file: [.env]
+        volumes:
+            - ${UPLOAD_LOCATION}:/data
+            - /etc/localtime:/etc/localtime:ro
+        depends_on: [redis, database]
+        restart: always
 
-        caddy:
-            image: caddy:latest
-            container_name: caddy
-            depends_on: [immich-server]
-            network_mode: host # This was removed due to docker network conflict (See Docker network mismatch)
-            ports:
-                - "80:80"
-                - "443:443"
-            volumes:
-                - ./Caddyfile:/etc/caddy/Caddyfile:ro
-                - caddy_data:/data
-                - caddy_config:/config
-            restart: always
+    caddy:
+        image: caddy:latest
+        container_name: caddy
+        depends_on: [immich-server]
+        network_mode: host # This was removed due to docker network conflict (See Docker network mismatch)
+        ports:
+            - "80:80"
+            - "443:443"
+        volumes:
+            - ./Caddyfile:/etc/caddy/Caddyfile:ro
+            - caddy_data:/data
+            - caddy_config:/config
+        restart: always
 
     # ddns-updater has been removed from the compose stack (see DDNS Misadventure)
     ddns-updater:
@@ -155,40 +159,43 @@ a free DNS hosting service, designed with security in mind. Running on open-sour
             - PERIOD=5m
         restart: unless-stopped
 
-    volumes:
-        model-cache:
-        caddy_data:
-        caddy_config:
-        caddy_logs:
+volumes:
+    model-cache:
+    caddy_data:
+    caddy_config:
+    caddy_logs:
 
-    networks:
-        default:
-            driver: bridge
-            enable_ipv6: true
-            ipam:
-                driver: default
+networks:
+    default:
+        driver: bridge
+        enable_ipv6: true
+        ipam:
+            driver: default
+
 ```
 
 ### `Caddyfile` (sanitized)
 
 ```
-    {
-        email <ACME_EMAIL>
+
+{
+    email <ACME_EMAIL>
+}
+
+<FQDN> {
+    encode zstd gzip
+
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "DENY"
+        Referrer-Policy "strict-origin-when-cross-origin"
     }
 
-    <FQDN> {
-        encode zstd gzip
+    # Immich upstream (adjust if different)
+    reverse_proxy http://immich-server:2283
+}
 
-        header {
-            Strict-Transport-Security "max-age=31536000; includeSubDomains"
-            X-Content-Type-Options "nosniff"
-            X-Frame-Options "DENY"
-            Referrer-Policy "strict-origin-when-cross-origin"
-        }
-
-        # Immich upstream (adjust if different)
-        reverse_proxy http://immich-server:2283
-    }
 ```
 
 ### ~~DDNS (`ddns-updater` config; sanitized)~~
@@ -196,16 +203,18 @@ a free DNS hosting service, designed with security in mind. Running on open-sour
 > ddns-updater was removed from the container (see DDNS Misadventure)
 
 ```json
+
+{
+    "settings": [
     {
-        "settings": [
-        {
-            "provider": "desec",
-            "domain": "<FQDN>",
-            "token": "<DESEC_TOKEN>",
-            "ip_version": "ipv6"
-        }
-        ]
+        "provider": "desec",
+        "domain": "<FQDN>",
+        "token": "<DESEC_TOKEN>",
+        "ip_version": "ipv6"
     }
+    ]
+}
+
 ```
 
 > ~~Add an IPv4 block later only if you obtain a true public IPv4 or terminate a tunnel on a public endpoint.~~
@@ -221,8 +230,10 @@ IPv6 inbound **80/443 TCP** allowed to the server.
 **Server firewall (UFW):**
    
 ```bash
-    sudo ufw allow 80/tcp
-    sudo ufw allow 443/tcp
+
+sudo ufw allow 80/tcp
+sudo ufw allow 443/tcp
+
 ```
        > No inbound ports besides 80/443 are open. SSH access is restricted to my LAN and rate-limited via UFW.
 
@@ -234,29 +245,39 @@ IPv6 inbound **80/443 TCP** allowed to the server.
 
         # DNS: AAAA only
 ```bash
-        dig +short A    <FQDN>          # (empty)
-        dig +short AAAA <FQDN>          # <GLOBAL_IPV6>
+
+dig +short A    <FQDN>          # (empty)
+dig +short AAAA <FQDN>          # <GLOBAL_IPV6>
+
 ```
 
         # HTTP → HTTPS redirect
 ```bash
-        curl -6I http://<FQDN>          # 301/308 with Location: https://<FQDN>/
+
+curl -6I http://<FQDN>          # 301/308 with Location: https://<FQDN>/
+
 ```
 
         # TLS & HTTP/2
 ```bash
-        curl -6I https://<FQDN>         # 200 with normal headers
+
+curl -6I https://<FQDN>         # 200 with normal headers
+
 ```
 
         # Optional: HTTP/3
 ```bash
-        curl -6I --http3 https://<FQDN>
+
+curl -6I --http3 https://<FQDN>
+
 ```
 
         # Certificate details
 ```bash
-        echo | openssl s_client -connect <FQDN>:443 -servername <FQDN> 2>/dev/null \
-            | openssl x509 -noout -subject -issuer -dates -ext subjectAltName
+
+echo | openssl s_client -connect <FQDN>:443 -servername <FQDN> 2>/dev/null \
+| openssl x509 -noout -subject -issuer -dates -ext subjectAltName
+
 ``` 
 
 
@@ -343,13 +364,14 @@ IPv6 inbound **80/443 TCP** allowed to the server.
 ## Appendix A — minimal `.env` (sanitized)
 
 ```
-        IMMICH_VERSION=v2
 
-        # Immich examples
-        DB_USERNAME=immich
-        DB_PASSWORD=<REDACTED>
-        DB_DATABASE_NAME=immich
-        UPLOAD_LOCATION=/srv/immich/library
+IMMICH_VERSION=v2
+# Immich examples
+DB_USERNAME=immich
+DB_PASSWORD=<REDACTED>
+DB_DATABASE_NAME=immich
+UPLOAD_LOCATION=/srv/immich/library
+
 ```
 
 ## Appendix B — deSEC one‑off update (sanitized)
@@ -357,8 +379,10 @@ IPv6 inbound **80/443 TCP** allowed to the server.
 
         # Seed/update AAAA manually; routine updates handled by ddns-updater
 ```bash
-        curl "https://update.dedyn.io/?hostname=<FQDN>&myipv6=$(curl -s -6 ifconfig.co)" \
-            -u "<FQDN>:<DESEC_TOKEN>"
+
+curl "https://update.dedyn.io/?hostname=<FQDN>&myipv6=$(curl -s -6 ifconfig.co)" \
+-u "<FQDN>:<DESEC_TOKEN>"
+
 ```
             ---
 
