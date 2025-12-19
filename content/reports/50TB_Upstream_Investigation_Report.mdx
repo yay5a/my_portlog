@@ -61,10 +61,11 @@ This investigation followed **AI/LLM guidance** that placed the capture **on a L
 |---|---:|---|
 | **WAN: ONT ↔ Eero (via TL‑SX1008)** | **No** | Unmanaged switch; no mirror; GS108E not inline |
 | **Eero internal Wi‑Fi ↔ Internet** | **No** | Bridged inside router then out WAN |
-| **Eero LAN ↔ GS108E ↔ SE3008v2 ↔ WAP #2** | **Yes** | This branch only |
-| **Eero LAN ↔ SE3005 ↔ WAP #1** | **No** | Bypasses GS108E |
-| **Eero LAN ↔ Desktop (direct)** | **No** | Bypasses GS108E |
-| **LAN broadcasts on GS108E branch** (mDNS/SSDP/ARP) | **Yes** | Local segment chatter |
+| **Eero LAN ↔ GS108E ↔ SE3008v2 ↔ WAP #2** | **No** | Bypasses GS108E mirror |
+| **Eero LAN ↔ SE3005 ↔ WAP #1** | **No** | Bypasses GS108E mirror |
+| **Eero LAN ↔ Desktop NIC port #1 (direct)** | **No** | Bypasses GS108E mirror |
+| **Eero LAN ↔ GS108E port #1 (mirror source)** | **Yes** | Mirrored local segment chatter |
+| **Desktop NIC port #2 ↔ GS108E port #8 (SPAN Destination)** | **Yes** | Receive-only capture feed |
 
 **Consequence:** All traffic captured was only LAN. None captured **WAN** interface where the ISP measured 50 TB.
 
@@ -72,17 +73,16 @@ This investigation followed **AI/LLM guidance** that placed the capture **on a L
 
 ## Tools & Scripts
 - tshark / dumpcap – packet capture and rotation (ring buffer)  
-- Python utilities – triage_parser.py, ip_extractor.c for per-host byte counts  
 - Wireshark – visual inspection of flow distribution  
 - nmap / arp-scan – endpoint enumeration  
-- AI-assisted parsing scripts & network configuration
+- AI-assisted parsing scripts (triage_parser.py, ip_extractor.c) & network configuration
 
 ---
 
 ## Methodology Origin and Limitation
 The capture topology (SPAN on GS108E mirroring the router’s LAN port) was set up **following generic AI/LLM guidance**. This vantage:
-- **Excluded the WAN** path entirely (ONT ↔ Eero via TL‑SX1008).
-- **Excluded** several LAN nodes (Eero Wi‑Fi clients; SE3005/WAP #1; direct Eero↔Desktop).
+- **Excluded the WAN** path entirely.
+- **Excluded** several LAN nodes (Eero Wi‑Fi clients; SE3005/WAP #1; SE3008v2/WAP #2).
 - Operated at **1 Gbps** on the SPAN switch, while the service is ~**5 Gbps**.
 
 Therefore, the lab itself was **incapable by design** of capturing the ISP’s **WAN‑edge** traffic to attribute the massive upload spikes.
@@ -96,7 +96,7 @@ Therefore, the lab itself was **incapable by design** of capturing the ISP’s *
 
 ---
 
-## Why the 50 TB Anomaly Cannot Be Attributed From These Pcaps
+## Why the 50 TB Anomaly Cannot Be Attributed From Captured Traffic
 1. **Segment mismatch:** ISP total is counted at **WAN**; pcaps are from a **LAN branch**.
 2. **Coverage gaps:** WAN flows were **unobserved**.
 3. **Timing and scale:** The *hope* of this investigation was a hail mary at best since I have to *professional* experience as a SOC Analyst, notwithstanding that I began monitoring and capturing **after** detection.
