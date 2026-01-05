@@ -15,7 +15,8 @@ export default function ProjectCard({ title, slug, description, image }) {
             <h3 className="text-xl font-semibold">
                 <Link
                     href={`/projects/${slug}`}
-                    className="text-lg font-semibold">
+                    className="text-lg font-semibold"
+                >
                     {title}
                 </Link>
             </h3>
@@ -36,7 +37,7 @@ export default function ProjectCard({ title, slug, description, image }) {
                     className="object-contain mx-auto mb-4 rounded"
                 />
             </div>
-            <p className="mb-3 text-sm text-slate-700">{description}</p>
+            <p className="mb-3 text-sm text-slate-300">{description}</p>
             <Link href={`/projects/${slug}`} className="text-sm">
                 View project
             </Link>
