@@ -11,7 +11,7 @@ summary: "Part one report applying what I learned from my mistakes after investi
 - Explain why `E:\..\2026-01_captures ❯ dumpcap -i '\Device\NPF_{CDC86D6E-A9D4-4A90-80F3-D03E91B134AB}' -q -w "est.baseline1.pcapng" -b filesize:1000000` instead of using Wireshark GUI
 
 - Include surprise error that occurred after 7 hours of monitoring/writing (Anti-virus was most likely the culprit, regardless of running dumpap from an elevated shell)
--- 
+    - How to be sure? Check Event viewer
  ```ps
 dumpcap: An error occurred while writing to the file to which the capture was being saved
 (".\est.baseline_00016_20260112214903.pcapng"): Permission denied.
