@@ -9,7 +9,6 @@
         "lint": "next lint"
     },
     "dependencies": {
-        "-": "^0.0.1",
         "@heroicons/react": "^2.2.0",
         "@mdx-js/loader": "^3.1.0",
         "@mdx-js/mdx": "^3.1.0",
@@ -23,7 +22,6 @@
         "gray-matter": "^4.0.3",
         "mongoose": "^9.0.1",
         "next": "^16.0.10",
-        "npm": "^11.5.2",
         "react": "^19.2.3",
         "react-dom": "^19.0.0",
         "react-icons": "^5.5.0",
